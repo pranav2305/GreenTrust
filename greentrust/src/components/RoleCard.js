@@ -6,7 +6,7 @@ export default function RoleCard({ name, imagePath }) {
           src={imagePath}
           className="w-[150px] h-[150px]"
         ></img>
-        <p className="w-[7rem] font-bold text-2xl text-center text-gray-700 font-comfortaa pt-4 ">
+        <p className="w-[7rem] font-bold text-2xl text-center text-gray-700 font-comfortaa pt-4   ">
           {name}
         </p>
       </div>

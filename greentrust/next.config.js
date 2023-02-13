@@ -16,14 +16,29 @@
 
 // module.exports = withPWA(nextConfig);
 
-const withPWA = require("next-pwa")({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-});
- 
-const nextConfig = withPWA({
-  reactStrictMode: true,
-});
- 
-module.exports = nextConfig;
+// const withPWA = require("next-pwa")({
+//   dest: "public",
+//   register: true,
+//   skipWaiting: true,
+// });
+
+// const nextConfig = withPWA({
+//   reactStrictMode: true,
+// });
+
+// module.exports = nextConfig;
+
+const withPWA = require('next-pwa');
+
+const settings = {
+  env: {
+  },
+  devIndicators: {
+    autoPrerender: false,
+  },
+  pwa: {
+    dest: 'public',
+  },
+};
+
+module.exports = process.env.NODE_ENV === 'development' ? settings : withPWA(settings);
