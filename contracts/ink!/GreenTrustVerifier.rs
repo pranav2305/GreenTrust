@@ -10,7 +10,11 @@ mod greentrustverifier {
         storage::Mapping,
     };
 
-    #[derive(scale::Encode,scale::Decode, scale_info::TypeInfo)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
+    #[derive(scale::Encode,scale::Decode)]
     #[derive(Default)]
     pub struct Verifier {
         id: u128,
