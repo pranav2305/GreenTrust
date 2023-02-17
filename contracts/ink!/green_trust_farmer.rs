@@ -1,8 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 // TODO:
-// 1. check about payable
-// 2. Why is the error code different for checking the same thing
+// 1. check about payable - done
+// 2. Why is the error code different for checking the same thing - ignore
 // 3. has_staked
 
 #[ink::contract]
@@ -25,7 +25,7 @@ mod greentrustfarmer {
         Closed,
     }
 
-    #[derive(scale::Encode, scale::Decode, Default)]
+    #[derive(scale::Encode, scale::Decode, Default, PartialEq)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -37,6 +37,11 @@ mod greentrustfarmer {
         Unsuccesful,
     }
 
+    #[derive(scale::Encode, scale::Decode, Default, PartialEq)]
+    #[cfg_attr(
+        feature = "std",
+        derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
+    )]
     pub enum ChallengeStatus {
         #[default]
         Open,
@@ -85,6 +90,7 @@ mod greentrustfarmer {
     pub struct Crop {
         id: u128,
         details: Vec<u8>,
+        harvested_on: u64,
         stake_amount: u128,
         farm_id: u128,
         status: CropStatus,
@@ -160,7 +166,6 @@ mod greentrustfarmer {
         stakes: Mapping<u128, Stake>,
         challenges: Mapping<u128, Challenge>,
         verifiers: Mapping<u128, Verifier>,
-        // has_staked: Mapping<u128, Mapping<AccountId, bool>>,
         num_farmers: u128,
         num_farms: u128,
         num_crops: u128,
@@ -168,47 +173,7 @@ mod greentrustfarmer {
         num_stakes: u128,
         num_challenges: u128,
         num_verifiers: u128,
-    }
-
-    // == Events ==
-
-    #[ink(event)]
-    pub struct FarmerRegistered {
-        #[ink(topic)]
-        farmer_address: AccountId,
-        id: u128,
-    }
-
-    #[ink(event)]
-    pub struct FarmerUpdated {
-        #[ink(topic)]
-        farmer_address: AccountId,
-        id: u128,
-    }
-
-    #[ink(event)]
-    pub struct FarmAdded {
-        farm_id: u128,
-        farmer_id: u128,
-    }
-
-    #[ink(event)]
-    pub struct SensorAdded {
-        id: u128,
-        crop_id: u128,
-    }
-
-    #[ink(event)]
-    pub struct SensorDataAdded {
-        sensor_id: u128,
-        data: Vec<u8>,
-    }
-
-    #[ink(event)]
-    pub struct StakeAdded {
-        id: u128,
-        crop_id: u128,
-        stakeholder: AccountId,
+        challenge_amount: u128,
     }
 
     // == Implementation ==
@@ -227,7 +192,6 @@ mod greentrustfarmer {
                 stakes: Mapping::default(),
                 challenges: Mapping::default(),
                 verifiers: Mapping::default(),
-                // has_staked: Mapping::default(),
                 num_farmers: 0,
                 num_farms: 0,
                 num_crops: 0,
@@ -235,6 +199,7 @@ mod greentrustfarmer {
                 num_stakes: 0,
                 num_challenges: 0,
                 num_verifiers: 0,
+                challenge_amount: 1000000,
             }
         }
 
@@ -246,10 +211,6 @@ mod greentrustfarmer {
             assert!(farmer_id != 0, "F0");
             self.farmers.get(farmer_id).unwrap().profile = profile;
             self.farmers.get(farmer_id).unwrap().id_cards = id_cards;
-            self.env().emit_event(FarmerUpdated {
-                farmer_address: self.env().caller(),
-                id: farmer_id,
-            });
         }
 
         #[ink(message)]
@@ -334,11 +295,6 @@ mod greentrustfarmer {
             self.farms.get(self.num_farmers).unwrap().documents = documents;
             self.farms.get(self.num_farmers).unwrap().is_valid = true;
             self.farms.get(self.num_farmers).unwrap().farmer_id = farmer_id;
-
-            self.env().emit_event(FarmAdded {
-                farm_id: self.num_farms,
-                farmer_id: farmer_id,
-            });
         }
 
         #[ink(message)]
@@ -368,7 +324,13 @@ mod greentrustfarmer {
         // == Crop Functions ==
 
         #[ink(message)]
-        pub fn add_crop(&mut self, details: Vec<u8>, stake_amount: u128, farm_id: u128) {
+        pub fn add_crop(
+            &mut self,
+            details: Vec<u8>,
+            harvested_on: u64,
+            stake_amount: u128,
+            farm_id: u128,
+        ) {
             let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
             assert!(farmer_id != 0, "F0");
             assert!(
@@ -377,6 +339,7 @@ mod greentrustfarmer {
             );
             self.num_crops += 1;
             self.crops.get(self.num_crops).unwrap().details = details;
+            self.crops.get(self.num_crops).unwrap().harvested_on = harvested_on;
             self.crops.get(self.num_crops).unwrap().stake_amount = stake_amount;
             self.crops.get(self.num_crops).unwrap().farm_id = farm_id;
             self.crops.get(self.num_crops).unwrap().is_valid = true;
@@ -451,11 +414,6 @@ mod greentrustfarmer {
             self.sensors.get(self.num_sensors).unwrap().crop_id = crop_id;
             self.sensors.get(self.num_sensors).unwrap().is_valid = true;
             self.sensors.get(self.num_sensors).unwrap().id = self.num_sensors;
-
-            self.env().emit_event(SensorAdded {
-                id: self.num_sensors,
-                crop_id: crop_id,
-            });
         }
 
         #[ink(message)]
@@ -498,11 +456,14 @@ mod greentrustfarmer {
             id_cards: Vec<u8>,
         ) {
             assert!(
-                self.address_to_verifier_ids.get(self.env().caller()) == 0,
+                self.address_to_verifier_ids
+                    .get(self.env().caller())
+                    .unwrap()
+                    == 0,
                 "V1"
             );
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()) == 0,
+                self.address_to_farmer_ids.get(self.env().caller()).unwrap() == 0,
                 "F1"
             );
             self.num_verifiers += 1;
@@ -521,11 +482,14 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn register_farmer(&mut self, profile: Vec<u8>, id_cards: Vec<u8>) {
             assert!(
-                self.address_to_verifier_ids.get(self.env().caller()) == 0,
+                self.address_to_verifier_ids
+                    .get(self.env().caller())
+                    .unwrap()
+                    == 0,
                 "V1"
             );
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()) == 0,
+                self.address_to_farmer_ids.get(self.env().caller()).unwrap() == 0,
                 "F1"
             );
             self.num_farmers += 1;
@@ -557,27 +521,53 @@ mod greentrustfarmer {
 
         // == Stake Functions ==
 
-        #[ink(message)]
+        #[ink(message, payable)]
         pub fn add_challenge(&mut self, challenged: u128, status: ChallengeStatus) {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
                 .unwrap();
-            assert!(verifier_id !=0
-            || self.address_to_farmer_ids.get(self.env().caller()) != try.unwrap_or(0), "U0");
+            assert!(
+                verifier_id != 0
+                    || self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0,
+                "U0"
+            );
             assert!(self.crops.get(challenged).unwrap().is_valid, "Cr0");
+            assert!(self.env().transferred_value() == self.challenge_amount);
             self.num_challenges += 1;
             self.challenges.get(self.num_challenges).unwrap().id = self.num_challenges;
-            self.challenges.get(self.num_challenges).unwrap().challenger = verifier_id;
+            self.challenges.get(self.num_challenges).unwrap().challenger = self.env().caller();
             self.challenges.get(self.num_challenges).unwrap().challenged = challenged;
             self.challenges.get(self.num_challenges).unwrap().status = status;
             self.challenges.get(self.num_challenges).unwrap().is_valid = true;
         }
 
         #[ink(message)]
+        pub fn has_staked(&mut self, crop_id: u128, wallet_address: AccountId) -> bool {
+            assert!(self.crops.get(crop_id).unwrap().is_valid, "Cr0");
+            let mut has_stake: bool = false;
+            for i in 1..self.num_stakes + 1 {
+                if (self.stakes.get(i).unwrap().crop_id == crop_id
+                    && self.stakes.get(i).unwrap().stakeholder == self.env().caller())
+                {
+                    has_stake = true;
+                }
+            }
+            has_stake
+        }
+
+        #[ink(message, payable)]
         pub fn add_stake(&mut self, crop_id: u128) {
             let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
-            assert!(farmer_id != 0 || self.address_to_verifier_ids.get(self.env().caller()) != try.unwrap_or(0), "U0");
+            assert!(
+                farmer_id != 0
+                    || self
+                        .address_to_verifier_ids
+                        .get(self.env().caller())
+                        .unwrap()
+                        != 0,
+                "U0"
+            );
             assert!(self.crops.get(crop_id).unwrap().is_valid, "Cr0");
             assert!(
                 self.crops.get(crop_id).unwrap().status == CropStatus::Open,
@@ -591,21 +581,85 @@ mod greentrustfarmer {
                     != self.address_to_farmer_ids.get(self.env().caller()).unwrap(),
                 "F0St"
             );
+            assert!(
+                self.env().transferred_value() == self.crops.get(crop_id).unwrap().stake_amount
+            );
+            assert!(!self.has_staked(crop_id, self.env().caller()), "St1");
 
-            // TODO: Check if the farmer has already staked for this crop
+            // TODO: Check if the farmer has already staked for this crop - done
 
             self.num_stakes += 1;
             self.stakes.get(self.num_stakes).unwrap().id = self.num_stakes;
             self.stakes.get(self.num_stakes).unwrap().crop_id = crop_id;
             self.stakes.get(self.num_stakes).unwrap().stakeholder = self.env().caller();
-            self.stakes.get(self.num_stakes).unwrap().status = StakeStatus::Open;
+            self.stakes.get(self.num_stakes).unwrap().status = StakeStatus::Staked;
             self.stakes.get(self.num_stakes).unwrap().is_valid = true;
 
-            // TODO: Put in has_staked
+            // TODO: Put in has_staked - done
         }
 
         #[ink(message)]
-        pub fn accept_challenge(&mut self, challenge_id: u128) {
+        pub fn return_stake(&mut self, stake_id: u128) {
+            assert!(self.stakes.get(stake_id).unwrap().is_valid, "St0");
+            assert!(
+                self.stakes.get(stake_id).unwrap().stakeholder == self.env().caller(),
+                "St0U"
+            );
+            assert!(
+                self.stakes.get(stake_id).unwrap().status == StakeStatus::Staked,
+                "St0S"
+            );
+            assert!(
+                self.crops
+                    .get(self.stakes.get(stake_id).unwrap().crop_id)
+                    .unwrap()
+                    .harvested_on
+                    != 0,
+                "St0H"
+            );
+            assert!(
+                self.crops
+                    .get(self.stakes.get(stake_id).unwrap().crop_id)
+                    .unwrap()
+                    .status
+                    != CropStatus::Closed,
+                "St0H"
+            );
+            assert!(
+                self.env().block_timestamp()
+                    > self
+                        .crops
+                        .get(self.stakes.get(stake_id).unwrap().crop_id)
+                        .unwrap()
+                        .harvested_on
+                        + 90 * 24 * 60 * 60
+            );
+            self.stakes.get(stake_id).unwrap().status = StakeStatus::Released;
+            self.crops
+                .get(self.stakes.get(stake_id).unwrap().crop_id)
+                .unwrap()
+                .status = CropStatus::Closed;
+            if self
+                .env()
+                .transfer(
+                    self.env().caller(),
+                    self.crops
+                        .get(self.stakes.get(stake_id).unwrap().crop_id)
+                        .unwrap()
+                        .stake_amount,
+                )
+                .is_err()
+            {
+                panic!(
+                    "requested transfer failed. this can be the case if the contract does not\
+                     have sufficient free funds or if the transfer would have brought the\
+                     contract's balance below minimum balance."
+                )
+            }
+        }
+
+        #[ink(message)]
+        pub fn claim_challenge(&mut self, challenge_id: u128) {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
@@ -620,29 +674,94 @@ mod greentrustfarmer {
         pub fn fetch_challenge_details(&self, challenge_id: u128) {
             assert!(
                 challenge_id > 0
-                    && challenge_id <= num_challenges
+                    && challenge_id <= self.num_challenges
                     && self.challenges.get(challenge_id).unwrap().is_valid,
                 "Ch0"
             );
             self.challenges.get(challenge_id).unwrap();
         }
 
+        #[ink(message)]
+        pub fn give_verdict(&mut self, challenge_id: u128, status: ChallengeStatus) {
+            assert!(self.challenges.get(challenge_id).unwrap().is_valid, "Ch0");
+            assert!(
+                self.challenges.get(challenge_id).unwrap().status == ChallengeStatus::Alloted,
+                "Ch0S"
+            );
+            assert!(
+                self.challenges.get(challenge_id).unwrap().verifier_id
+                    == self
+                        .address_to_verifier_ids
+                        .get(self.env().caller())
+                        .unwrap(),
+                "Ch0V"
+            );
+            assert!(
+                self.crops
+                    .get(self.challenges.get(challenge_id).unwrap().challenged)
+                    .unwrap()
+                    .status
+                    != CropStatus::Closed,
+                "Ch0C"
+            );
+            if status == ChallengeStatus::Succesful {
+                self.crops
+                    .get(self.challenges.get(challenge_id).unwrap().challenged)
+                    .unwrap()
+                    .status = CropStatus::Closed;
+                let mut temp_num_stakes: u128 = 0;
+                for i in 1..self.num_stakes + 1 {
+                    temp_num_stakes += 1;
+                    self.stakes.get(i).unwrap().status = StakeStatus::Unsuccesful;
+                }
+                if self
+                    .env()
+                    .transfer(
+                        self.challenges.get(challenge_id).unwrap().challenger,
+                        self.crops
+                            .get(self.challenges.get(challenge_id).unwrap().challenged)
+                            .unwrap()
+                            .stake_amount
+                            * temp_num_stakes,
+                    )
+                    .is_err()
+                {
+                    panic!(
+                        "requested transfer failed. this can be the case if the contract does not\
+                     have sufficient free funds or if the transfer would have brought the\
+                     contract's balance below minimum balance."
+                    )
+                }
+            }
+            if self
+                .env()
+                .transfer(self.env().caller(), self.challenge_amount)
+                .is_err()
+            {
+                panic!(
+                    "requested transfer failed. this can be the case if the contract does not\
+                     have sufficient free funds or if the transfer would have brought the\
+                     contract's balance below minimum balance."
+                )
+            }
+        }
+
         // == Common Functions ==
 
-        // #[ink(message)]
-        // pub fn fetch_user_type(&self) -> Vec<u8> {
-        //     assert!(
-        //         self.address_to_farmer_ids.get(self.env().caller()) != 0
-        //             || self.address_to_verifier_ids.get(self.env().caller()) != try.unwrap_or(0),
-        //         "U0"
-        //     );
-        //     if self.address_to_farmer_ids.get(self.env().caller()) != 0 {
-        //         return "farmer".as_bytes().to_vec();
-        //     } else if self.address_to_verifier_ids.get(self.env().caller()) != 0 {
-        //         return "verifier".as_bytes().to_vec();
-        //     } else {
-        //         return "consumer".as_bytes().to_vec();
-        //     }
-        // }
+        #[ink(message)]
+        pub fn fetch_user_type(&self) -> Vec<u8> {
+            assert!(
+                self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0
+                    || self.address_to_verifier_ids.get(self.env().caller()).unwrap() != 0,
+                "U0"
+            );
+            if (self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0) {
+                return "farmer".as_bytes().to_vec();
+            } else if (self.address_to_verifier_ids.get(self.env().caller()).unwrap() != 0) {
+                return "verifier".as_bytes().to_vec();
+            } else {
+                return "consumer".as_bytes().to_vec();
+            }
+        }
     }
 }
