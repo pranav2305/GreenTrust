@@ -7,10 +7,9 @@ import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 
 export default function Add() {
-  const { loading, setLoading } = useContext(LoaderContext);
   const router = useRouter();
   const { farmId, cropId } = router.query;
-
+  
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(function (position) {
       setFarmDetails({
@@ -20,12 +19,12 @@ export default function Add() {
       });
     });
   }, []);
-
+  
   const auth = useAuth();
   const [farmDetails, setFarmDetails] = useState({});
   const [ids, setIds] = useState([]);
+  const { loading, setLoading } = useContext(LoaderContext);
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Hello Frands");
@@ -109,7 +108,7 @@ export default function Add() {
             onChange={(e) =>
               setFarmDetails({ ...farmDetails, name: e.target.value })
             }
-            placeHolder={"Crop name"}
+            placeHolder={"Farm name"}
             type={"text"}
           />
           <InputBox
