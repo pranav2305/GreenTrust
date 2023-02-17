@@ -129,6 +129,8 @@ mod greentrustfarmer {
         challenger: AccountId,
         challenged: u128,
         status: ChallengeStatus,
+        description: Vec<u8>,
+        documents: Vec<u8>
     }
 
     #[cfg_attr(
@@ -198,17 +200,6 @@ mod greentrustfarmer {
         // == Farmer Functions ==
 
         #[ink(message)]
-        pub fn update_farmer_profile(&mut self, profile: Vec<u8>, id_cards: Vec<u8>) {
-            let farmer_id = self
-                .address_to_farmer_ids
-                .get(self.env().caller())
-                .unwrap_or(0);
-            assert!(farmer_id != 0, "F0");
-            self.farmers.get(farmer_id).unwrap().profile = profile;
-            self.farmers.get(farmer_id).unwrap().id_cards = id_cards;
-        }
-
-        #[ink(message)]
         pub fn fetch_farmer_farms(&self, farmer_id: u128) -> Vec<Farm> {
             assert!(
                 farmer_id > 0 && farmer_id <= self.num_farmers
@@ -219,31 +210,18 @@ mod greentrustfarmer {
                         > 0,
                 "F0"
             );
-            let mut f_id = 0;
+            let f_id;
             if farmer_id == 0 {
                 f_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
             } else {
                 f_id = farmer_id;
             }
 
-            let mut farm_ids: Vec<u128> = Vec::new();
+            let mut farmer_farms: Vec<Farm> = Vec::new();
             for i in 1..self.num_farms + 1 {
                 if self.farms.get(i).unwrap().farmer_id == f_id {
-                    farm_ids.push(i);
+                    farmer_farms.push(self.farms.get(i).unwrap());
                 }
-            }
-
-            let mut farm_ids: Vec<u128> = Vec::new();
-            let mut farmer_farms = Vec::new();
-
-            for i in 1..self.num_farms + 1 {
-                if self.farms.get(i).unwrap().farmer_id == f_id {
-                    farm_ids.push(i);
-                }
-            }
-
-            for i in 0..farm_ids.len() {
-                farmer_farms.push(self.farms.get(farm_ids[i]).unwrap());
             }
 
             farmer_farms
@@ -258,17 +236,11 @@ mod greentrustfarmer {
                     != 0,
                 "F0"
             );
-            let mut stake_ids: Vec<u128> = Vec::new();
+            let mut farmer_stakes: Vec<Stake> = Vec::new();
             for i in 1..self.num_stakes + 1 {
                 if self.stakes.get(i).unwrap().stakeholder == self.env().caller() {
-                    stake_ids.push(i);
+                    farmer_stakes.push(self.stakes.get(i).unwrap());
                 }
-            }
-
-            let mut farmer_stakes = Vec::new();
-
-            for i in 0..stake_ids.len() {
-                farmer_stakes.push(self.stakes.get(stake_ids[i]).unwrap());
             }
 
             farmer_stakes
@@ -305,23 +277,27 @@ mod greentrustfarmer {
             self.farms.insert(&self.num_farms, &new_farm);
         }
 
+        // fetch all farms
+        #[ink(message)]
+        pub fn fetch_all_farms(&self) -> Vec<Farm> {
+            let mut all_farms: Vec<Farm> = Vec::new();
+            for i in 1..self.num_farms + 1 {
+                all_farms.push(self.farms.get(i).unwrap());
+            }
+            all_farms
+        }
+
         #[ink(message)]
         pub fn fetch_farm_crops(&self, farm_id: u128) -> Vec<Crop> {
             assert!(farm_id > 0 && farm_id <= self.num_farms, "F0");
-            let mut crop_ids: Vec<u128> = Vec::new();
+            let mut farm_crops: Vec<Crop> = Vec::new();
             for i in 1..self.num_crops + 1 {
                 if self.crops.get(i).unwrap().farm_id == farm_id {
-                    crop_ids.push(i);
+                    farm_crops.push(self.crops.get(i).unwrap());
                 }
             }
 
-            let mut farmer_crops = Vec::new();
-
-            for i in 0..crop_ids.len() {
-                farmer_crops.push(self.crops.get(crop_ids[i]).unwrap());
-            }
-
-            farmer_crops
+            farm_crops
         }
 
         // == Crop Functions ==
@@ -358,17 +334,12 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn fetch_crop_sensors(&self, crop_id: u128) -> Vec<Sensor> {
             assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
-            let mut sensor_ids: Vec<u128> = Vec::new();
-            let mut crop_sensors = Vec::new();
+            let mut crop_sensors: Vec<Sensor> = Vec::new();
 
             for i in 1..self.num_sensors + 1 {
                 if self.sensors.get(i).unwrap().crop_id == crop_id {
-                    sensor_ids.push(i);
+                    crop_sensors.push(self.sensors.get(i).unwrap());
                 }
-            }
-
-            for i in 0..sensor_ids.len() {
-                crop_sensors.push(self.sensors.get(sensor_ids[i]).unwrap());
             }
 
             crop_sensors
@@ -377,21 +348,30 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn fetch_crop_stakes(&self, crop_id: u128) -> Vec<Stake> {
             assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
-            let mut stake_ids: Vec<u128> = Vec::new();
-            let mut crop_stakes = Vec::new();
+            let mut crop_stakes: Vec<Stake> = Vec::new();
 
             for i in 1..self.num_stakes + 1 {
                 if self.stakes.get(i).unwrap().crop_id == crop_id {
-                    stake_ids.push(i);
+                    crop_stakes.push(self.stakes.get(i).unwrap());
                 }
-            }
-
-            for i in 0..stake_ids.len() {
-                crop_stakes.push(self.stakes.get(stake_ids[i]).unwrap());
             }
 
             crop_stakes
         }
+
+        #[ink(message)]
+        pub fn fetch_crop_challenges(&self, crop_id: u128) -> Vec<Challenge> {
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
+            let mut crop_challeneges: Vec<Challenge> = Vec::new();
+
+            for i in 1..self.num_challenges + 1 {
+                if self.challenges.get(i).unwrap().challenged == crop_id {
+                    crop_challeneges.push(self.challenges.get(i).unwrap());
+                }
+            }
+
+            crop_challeneges
+        }        
 
         // == Sensor Functions ==
 
@@ -423,33 +403,7 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn add_sensor_data(&mut self, sensor_id: u128, data: Vec<u8>) {
-            let farmer_id = self
-                .address_to_farmer_ids
-                .get(self.env().caller())
-                .unwrap_or(0);
-            assert!(farmer_id != 0, "F0");
             assert!(sensor_id > 0 && sensor_id <= self.num_sensors, "S0");
-            assert!(
-                self.farms
-                    .get(
-                        self.crops
-                            .get(self.sensors.get(sensor_id).unwrap().crop_id)
-                            .unwrap()
-                            .farm_id
-                    )
-                    .unwrap()
-                    .farmer_id
-                    == farmer_id,
-                "F0SD"
-            );
-            assert!(
-                self.crops
-                    .get(self.sensors.get(sensor_id).unwrap().crop_id)
-                    .unwrap()
-                    .status
-                    == CropStatus::Open,
-                "Cr0"
-            );
 
             self.sensors.get(sensor_id).unwrap().data = data;
         }
@@ -518,27 +472,10 @@ mod greentrustfarmer {
                 .insert(&self.env().caller(), &self.num_farmers);
         }
 
-        #[ink(message)]
-        pub fn update_verifier_profile(
-            &mut self,
-            name: Vec<u8>,
-            current_address: Vec<u8>,
-            id_cards: Vec<u8>,
-        ) {
-            let verifier_id = self
-                .address_to_verifier_ids
-                .get(self.env().caller())
-                .unwrap_or(0);
-            assert!(verifier_id != 0, "V0");
-            self.verifiers.get(verifier_id).unwrap().name = name;
-            self.verifiers.get(verifier_id).unwrap().current_address = current_address;
-            self.verifiers.get(verifier_id).unwrap().id_cards = id_cards;
-        }
-
         // == Stake Functions ==
 
         #[ink(message, payable)]
-        pub fn add_challenge(&mut self, challenged: u128, status: ChallengeStatus) {
+        pub fn add_challenge(&mut self, challenged: u128, description: Vec<u8>, documents: Vec<u8>) {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
@@ -561,8 +498,19 @@ mod greentrustfarmer {
                 challenger: self.env().caller(),
                 challenged: challenged,
                 status: ChallengeStatus::default(),
+                description:  description,
+                documents: documents
             };
             self.challenges.insert(&self.num_challenges, &new_challenge);
+        }
+
+        #[ink(message)]
+        pub fn fetch_all_challenges(&self) -> Vec<Challenge>  {
+            let mut all_challenges: Vec<Challenge> = Vec::new();
+            for i in 1..self.num_challenges + 1 {
+                all_challenges.push(self.challenges.get(i).unwrap());
+            }
+            all_challenges
         }
 
         #[ink(message)]
@@ -571,7 +519,7 @@ mod greentrustfarmer {
             let mut has_stake: bool = false;
             for i in 1..self.num_stakes + 1 {
                 if self.stakes.get(i).unwrap().crop_id == crop_id
-                    && self.stakes.get(i).unwrap().stakeholder == self.env().caller()
+                    && self.stakes.get(i).unwrap().stakeholder == wallet_address
                 {
                     has_stake = true;
                 }
@@ -687,6 +635,20 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn claim_challenge(&mut self, challenge_id: u128) {
+            assert!(
+                challenge_id > 0 && challenge_id <= self.num_challenges,
+                "Ch0"
+            );
+            assert!(
+                self.challenges.get(challenge_id).unwrap().status == ChallengeStatus::Open,
+                "Ch0S"
+            );
+            assert!(
+                self.address_to_verifier_ids
+                    .get(self.env().caller())
+                    .unwrap_or(0)
+                    != 0, "Ch0V"
+            );
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
@@ -773,22 +735,21 @@ mod greentrustfarmer {
             }
         }
 
+        #[ink(message)]
+        pub fn fetch_verifier_challenges(&self, verifier_id: u128) -> Vec<Challenge> {
+            let mut temp: Vec<Challenge> = Vec::new();
+            for i in 1..self.num_challenges + 1 {
+                if self.challenges.get(i).unwrap().verifier_id == verifier_id {
+                    temp.push(self.challenges.get(i).unwrap());
+                }
+            }
+            return temp;
+        }
+
         // == Common Functions ==
 
         #[ink(message)]
         pub fn fetch_user_type(&self) -> Vec<u8> {
-            assert!(
-                self.address_to_farmer_ids
-                    .get(self.env().caller())
-                    .unwrap_or(0)
-                    != 0
-                    || self
-                        .address_to_verifier_ids
-                        .get(self.env().caller())
-                        .unwrap_or(0)
-                        != 0,
-                "U0"
-            );
             if self
                 .address_to_farmer_ids
                 .get(self.env().caller())
@@ -804,7 +765,7 @@ mod greentrustfarmer {
             {
                 return "verifier".as_bytes().to_vec();
             } else {
-                return "consumer".as_bytes().to_vec();
+                return "NR".as_bytes().to_vec();
             }
         }
     }
