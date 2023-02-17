@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot, faChartPie } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect, useContext } from "react";
 import { contractCall } from "@/utils";
-import { useAuth } from "@arcana/auth-react";
 import { useRouter } from 'next/router'
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
@@ -13,7 +12,14 @@ import Link from "next/link";
 import { AiFillPlusCircle } from "@react-icons/all-files/ai/AiFillPlusCircle";
 
 export default function FarmInfo() {
-  const auth = useAuth();
+
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
   const router = useRouter()
   const { farmId } = router.query
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);

@@ -1,7 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { contractCall } from "@/utils";
-import { useAuth } from "@arcana/auth-react";
-import { SnackbarContext } from "@/context/snackbarContext";
+ ;import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import FarmerDashboard from "@/components/FarmerDashboard";
 import FarmCard from "@/components/FarmCard";
@@ -9,7 +8,13 @@ import classes from "../style";
 import Link from "next/link";
 
 export default function Farms() {
-    const auth = useAuth();
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
     const { loading, setLoading } = useContext(LoaderContext);

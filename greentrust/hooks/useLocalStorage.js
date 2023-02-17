@@ -4,7 +4,7 @@ export function useLocalStorage(key, fallbackValue) {
     const [value, setValue] = useState(fallbackValue);
     useEffect(() => {
         const stored = localStorage.getItem(key);
-        setValue(stored ? JSON.parse(stored) : fallbackValue);
+        setValue(stored ? stored : fallbackValue);
     }, [fallbackValue, key]);
 
     useEffect(() => {

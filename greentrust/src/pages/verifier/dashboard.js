@@ -1,14 +1,19 @@
 import { useState, useEffect, useContext } from "react";
 import { contractCall, getChallengeStatusCode } from "@/utils";
-import { useAuth } from "@arcana/auth-react";
-import { SnackbarContext } from "@/context/snackbarContext";
+ ;import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import ChallengeCard from "@/components/ChallengeCard";
  import classes from "../../style";
 
 
 export default function VerifierDashboard() {
-    const auth = useAuth();
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
     
     const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
     const { loading, setLoading } = useContext(LoaderContext);

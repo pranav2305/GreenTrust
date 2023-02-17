@@ -14,12 +14,22 @@ import Spinner from "./Spinner";
 import { AuthContext } from "@/context/authContext";
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
-
+import { useChain } from "@/context/chainContext";
+import { useLocalStorage } from "hooks/useLocalStorage";
 
 export function ArcanaAuth() {
-  const router = useRouter();
-  const auth = useAuth();
+  const [address, setAddress] = useLocalStorage('address');
 
+  const router = useRouter();
+  const { api, contract } = useChain();
+  const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
+  
   const { loadingAuth, authProvider } = useContext(AuthContext);
 
   return (
@@ -49,7 +59,16 @@ export function ArcanaAuth() {
 }
 
 export default function Layout({ children }) {
-  const auth = useAuth();
+  const [address, setAddress] = useLocalStorage('address');
+  const { api, contract } = useChain();
+
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
   const [loading, setLoading] = useState(false);
 

@@ -31,6 +31,7 @@ const Landing = () => {
   console.log(api, contract, "testing");
 
   async function registerUser() {
+    if(address!==null) {
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
     const mnemonic = mnemonicGenerate();
 
@@ -44,7 +45,7 @@ const Landing = () => {
     localStorage.setItem('address', pair.address);
     // setMnemonic(mnemonic)
     router.push("/profile/role-choice")
-  }
+  }}
 
   return (
     <div className="bg-white w-full overflow-hidden flex">

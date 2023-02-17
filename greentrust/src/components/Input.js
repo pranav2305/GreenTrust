@@ -3,12 +3,17 @@ import React, { useState } from "react";
 import DropDown from "./DropDown";
 import InputBox from "./InputBox";
 import { AuthContext } from "@/context/authContext";
-import { useAuth } from "@arcana/auth-react";
-import { contractCall } from "@/utils";
+ ;import { contractCall } from "@/utils";
 
 export default function Input() {
   
-  const auth = useAuth();
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
   
 
   
