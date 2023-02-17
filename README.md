@@ -76,3 +76,14 @@ stakeholders, and alert stakeholders immediately of issues.
 - Shashank S M
 - Pranav Agarwal
 - Parth Mittal
+# GreenTrust
+A blockchain revolution for organic farming.
+
+## Setup
+1. Touch `root/.env` file as follows:
+```.env
+GOERLI_PRIVATE_KEY=<key>
+CONTRACT_ADDRESS=0x45124
+```
+2. `npm i`
+3. `npx hardhat run ./scripts/deploy.js --network NETWORK_NAME`

@@ -1,63 +1,97 @@
-import Head from "next/head";
-import Image from "next/image";
-import { Inter } from "@next/font/google";
-import styles from "@/styles/Home.module.css";
-import { Auth, useAuth } from "@arcana/auth-react";
+import { useRouter } from "next/router";
+
+const { Keyring } = require('@polkadot/keyring');
+import LandingNavbar from "@/components/LandingNavbar";
+import Button from "@/components/Button";
+import { useChain } from "@/context/chainContext";
+import { useEstimationContext } from "@/context/estimationContext";
+import { useCallerContext } from "@/context/callerContext"; 
+import { useAccountsContext } from "@/context/accountContext";
 import { useEffect } from "react";
-import NavBar from "@/components/Navbar";
-import RoleCard from "@/components/RoleCard";
+import { contractCall } from "@/InkUtils";
+const { mnemonicGenerate } = require('@polkadot/util-crypto');
+import { useLocalStorage } from "hooks/useLocalStorage";
 
-const inter = Inter({ subsets: ["latin"] });
 
-// export default function Home() {
-//   const auth = useAuth();
 
-//   useEffect(() => {
-//     if (auth?.isLoggedIn){
-//       console.log(auth.user);
-//     }
-//   }, [auth?.user]);
+const Landing = () => {
+  const { api, contract } = useChain();
+  const { estimation } = useEstimationContext();
+  const { caller } = useCallerContext();
+  const { accounts } = useAccountsContext();
+  // const [mnemonic, setMnemonic] = useLocalStorage('mnemonic', {});
+  const router = useRouter();
 
-//   const onLogin = async () => {
-//     console.log("Logged in with address: " + auth.provider);
-//     const info = await auth.getUser()
-//      console.log(auth.getUser());
+  useEffect(() => {
+    console.log(api, contract, accounts, estimation, caller, "testing useEffect");
+    if (!api || !contract || !estimation || !caller) return;
+    console.log(contractCall({api: api, contract: contract, estimation: estimation, caller: caller}, "fetchUserType"), "contractCall testing");
+  }, [api, contract, estimation, caller, accounts])
 
-//   };
-//   const logout = async()=>{
-//     await auth.logout();
-//   }
-//   return (
-//     <>
-//       {auth.loading ? (
-//         "Loading"
-//       ) : auth.isLoggedIn ? (
-//         <div>
-//         Logged In
-//         <button onClick={logout}>Logout</button>
-//         </div>
-//       ) : (
-//         <div>
-//           <Auth externalWallet={true} theme={"light"} onLogin={onLogin}/>
-//         </div>
-//       )}
-//     </>
-//   )
-// }
+  console.log(api, contract, "testing");
 
-export default function Home({}) {
+  async function registerUser() {
+    if(address!==null) {
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const mnemonic = mnemonicGenerate();
+
+    console.log(mnemonic)
+    const pair = keyring.addFromUri(mnemonic, { name: 'kid-116' }, 'ed25519');
+    console.log(pair.address)
+    
+    // console.log(keypair);
+    // console.log(keypair.address);
+    localStorage.setItem('mnemonic', mnemonic);
+    localStorage.setItem('address', pair.address);
+    // setMnemonic(mnemonic)
+    router.push("/profile/role-choice")
+  }}
+
   return (
-    <>
-        <div className="flex flex-col md:flex-row justify-center md:justify-around items-center min-h-screen -mt-10">
-          <p className="h-32 font-bold text-6xl text-primary font-comfortaa mt-20 md:mt-0 text-left mr-16 md:mr-0">
-            Get <br></br>Verified
-          </p>
-          <div className="flex space-x-[20px] flex-col md:flex-row">
-            <RoleCard name={"Farmer"} imagePath={"farmer-woman.png"} />
-            <RoleCard name={"Licensed Inspector"} imagePath={"sheriff.png"} />
+    <div className="bg-white w-full overflow-hidden flex">
+      <div className="md:w-2/3 w-full">
+        <LandingNavbar />
+        <div
+          id="home"
+          className="flex flex-col items-center h-full md:pt-[160px] py-[40px]"
+        >
+          <div className="flex md:hidden">
+            <img src="/images/farmer.png" alt="landing" className="w-full"/>
+          </div>
+
+          <div className="px-[10%] md:px-0 w-fit">
+            <div>
+              <p className="font-comfortaa font-bold ss:text-[44px] text-[40px] text-darkGray">
+                Register with
+              </p>
+              <h1 className="font-poppins ss:text-[68px] text-[52px] text-primary leading-[120%] w-full">
+                <span className="text-primary font-extrabold">Green </span>
+                <span className="text-gray font-medium">TRUST</span>
+              </h1>
+              <p className="flex-1 font-comfortaa font-semibold ss:text-[44px] text-[40px] text-darkGray">
+                today!
+              </p>
+            </div>
+            
+            <p
+              className={`text-3xl text-gray font-bold font-comfortaa max-w-[470px] mt-5`}
+            >
+              Secure <span className="text-red">seamless</span>, <span className="text-red">hassle-free</span> and <span className="text-red">trusted</span> certification for your <span className="text-primary">organic produce</span>.
+            </p>
+
+            <div className="mt-6">
+              <Button text={"Get Started"} styles={"!py-2 text-2xl"} onClick={() => {registerUser()}} />
+            </div>
+
           </div>
         </div>
-      
-    </>
+      </div>
+
+      <div className="w-1/3 hidden md:flex ">
+        <img src="./images/landing.svg" alt="landing" className="object-cover w-full h-screen"/>
+      </div>
+    </div>
   );
-}
+};
+
+export default Landing;
