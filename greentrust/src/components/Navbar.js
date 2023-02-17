@@ -1,17 +1,31 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {ethers} from 'ethers'
-import { useAuth } from "@arcana/auth-react";
-import * as PushAPI from "@pushprotocol/restapi";
+ ;import * as PushAPI from "@pushprotocol/restapi";
 import { EmbedSDK } from "@pushprotocol/uiembed";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-regular-svg-icons";
-
+// import Identicon from '@polkadot/react-identicon';
+import { useLocalStorage } from "hooks/useLocalStorage";
 import { ArcanaAuth } from './Layout';
 import Logo from "./Logo";
+import { useChain } from "@/context/chainContext";
+
 
 export default function Navar() {
-  const auth = useAuth();
+  const { api, contract } = useChain();
+
+  const [address, setAddress] = useLocalStorage('address');
+
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
+
+  
 
   async function pushSubscribe ()  {
     const provider = new ethers.providers.Web3Provider(auth.provider);
@@ -30,7 +44,10 @@ export default function Navar() {
   }
 
   useEffect( () => { 
-    console.log(auth.user)
+    // console.log(auth.user)
+     setAddress(localStorage.getItem('auth'));
+
+    
     if (auth.user && auth.user.address) { // 'your connected wallet address'
      pushSubscribe();
       EmbedSDK.init({
@@ -52,6 +69,7 @@ export default function Navar() {
         onClose: () => {
           console.log('-> client dApp onClose callback');
         }
+
         
    
       });
@@ -69,7 +87,12 @@ export default function Navar() {
           <button>
             <FontAwesomeIcon icon={faBell} className="text-2xl mx-3 text-darkGray" />
           </button>
-          <ArcanaAuth />
+          {/* <Identicon
+      value={address}
+      size={32}
+      theme={'substrate'}
+    /> */}
+          {/* <ArcanaAuth /> */}
         </div>
       </nav>
     </div>

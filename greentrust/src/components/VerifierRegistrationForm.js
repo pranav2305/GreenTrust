@@ -1,19 +1,31 @@
 import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
 
-import { useAuth } from "@arcana/auth-react";
-
+ ;
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 import Form from "@/components/Form";
+import InputBox from "./InputBox";
+import { useChain } from "@/context/chainContext";
+import { useLocalStorage } from "hooks/useLocalStorage";
 
 
 export default function VerifierRegistrationForm() {
     const { loading, setLoading } = useContext(LoaderContext);
     const router = useRouter();
 
-    const auth = useAuth();
+    const {api, contract} = useChain();
+
+    const [address, setAddress] = useLocalStorage('address')
+
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     useEffect(() => {
         if (auth.user) {

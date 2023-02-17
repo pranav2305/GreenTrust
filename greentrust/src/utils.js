@@ -3,6 +3,23 @@ import IpfsHttpClientLite from 'ipfs-http-client-lite';
 import { CONTRACT_ADDRESS } from '@/config';
 import GreenTrustABI from '@/abi/GreenTrust.json';
 
+const gasLimit = 3000n * 1000000n;
+const storageDepositLimit = null;
+
+// const res = await contract.tx
+//     ['addSensorData']({ storageDepositLimit, gasLimit }, ...params)
+//         .signAndSend(pair, result => {
+//             if (result.status.isInBlock) {
+//                 console.log('in a block');
+//             } else if (result.status.isFinalized) {
+//                 console.log('finalized');
+//             }
+//         });
+//     console.log(res);
+
+// const mnemonic = keyring.addFromUri(localStorage.getItem('mnemonic'), { name: 'user' }, 'ed25519');
+
+
 export const uploadFile = async (files) => {
 const projectId = '2Ln8ZP0EreH0IInN40eJm52wZa7';
 const projectSecret = 'ffc9d27761543211de14432fee351c80';

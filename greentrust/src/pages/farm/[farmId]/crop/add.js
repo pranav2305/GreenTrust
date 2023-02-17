@@ -1,8 +1,7 @@
 import InputBox from "@/components/InputBox";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
-import { useAuth } from "@arcana/auth-react";
-import { LoaderContext } from "@/context/loaderContext";
+ ;import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall } from "@/utils";
 
@@ -13,7 +12,13 @@ export default function Add () {
 
   useEffect(() => {}, []);
 
-  const auth = useAuth();
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
   const [cropDetails, setCropDetails] = useState({})
   const [harvestedOn, setHarvestedOn] = useState(0)
   const [stakeAmount, setStakeAmount] = useState(0)

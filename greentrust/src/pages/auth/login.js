@@ -8,7 +8,13 @@ import { AuthContext } from "@/context/authContext";
 import Spinner from "@/components/Spinner";
 
 export default function Login({ children }) {
-    const auth = useAuth();
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     const { loadingAuth } = useContext(AuthContext);
 

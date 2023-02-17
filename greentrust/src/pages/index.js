@@ -1,10 +1,51 @@
 import { useRouter } from "next/router";
 
+const { Keyring } = require('@polkadot/keyring');
 import LandingNavbar from "@/components/LandingNavbar";
 import Button from "@/components/Button";
+import { useChain } from "@/context/chainContext";
+import { useEstimationContext } from "@/context/estimationContext";
+import { useCallerContext } from "@/context/callerContext"; 
+import { useAccountsContext } from "@/context/accountContext";
+import { useEffect } from "react";
+import { contractCall } from "@/InkUtils";
+const { mnemonicGenerate } = require('@polkadot/util-crypto');
+import { useLocalStorage } from "hooks/useLocalStorage";
+
+
 
 const Landing = () => {
+  const { api, contract } = useChain();
+  const { estimation } = useEstimationContext();
+  const { caller } = useCallerContext();
+  const { accounts } = useAccountsContext();
+  // const [mnemonic, setMnemonic] = useLocalStorage('mnemonic', {});
   const router = useRouter();
+
+  useEffect(() => {
+    console.log(api, contract, accounts, estimation, caller, "testing useEffect");
+    if (!api || !contract || !estimation || !caller) return;
+    console.log(contractCall({api: api, contract: contract, estimation: estimation, caller: caller}, "fetchUserType"), "contractCall testing");
+  }, [api, contract, estimation, caller, accounts])
+
+  console.log(api, contract, "testing");
+
+  async function registerUser() {
+    if(address!==null) {
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const mnemonic = mnemonicGenerate();
+
+    console.log(mnemonic)
+    const pair = keyring.addFromUri(mnemonic, { name: 'kid-116' }, 'ed25519');
+    console.log(pair.address)
+    
+    // console.log(keypair);
+    // console.log(keypair.address);
+    localStorage.setItem('mnemonic', mnemonic);
+    localStorage.setItem('address', pair.address);
+    // setMnemonic(mnemonic)
+    router.push("/profile/role-choice")
+  }}
 
   return (
     <div className="bg-white w-full overflow-hidden flex">
@@ -39,7 +80,7 @@ const Landing = () => {
             </p>
 
             <div className="mt-6">
-              <Button text={"Get Started"} styles={"!py-2 text-2xl"} onClick={() => {router.push('/auth/login')}} />
+              <Button text={"Get Started"} styles={"!py-2 text-2xl"} onClick={() => {registerUser()}} />
             </div>
 
           </div>

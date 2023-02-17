@@ -14,8 +14,7 @@ import {
     faHandHoldingDollar,
     faShare
 } from "@fortawesome/free-solid-svg-icons";
-import { useAuth } from "@arcana/auth-react";
-
+ ;
 import SensorCard from "@/components/SensorCard";
 import FarmerCard from "@/components/FarmerInfoCard";
 import Button from "@/components/Button";
@@ -31,7 +30,13 @@ const Crop = () => {
 
     const { farmId, cropId } = router.query;
 
-    const auth = useAuth();
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     const [data, setData] = useState(null);
 
