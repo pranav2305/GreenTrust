@@ -7,6 +7,7 @@ import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 import Form from "@/components/Form";
+import InputBox from "./InputBox";
 
 
 export default function VerifierRegistrationForm() {
