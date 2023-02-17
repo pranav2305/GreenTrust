@@ -62,7 +62,6 @@ mod greentrustfarmer {
         wallet_address: AccountId,
         profile: Vec<u8>,
         id_cards: Vec<u8>,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -79,7 +78,6 @@ mod greentrustfarmer {
         location: Vec<u8>,
         farmer_id: u128,
         documents: Vec<u8>,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -94,7 +92,6 @@ mod greentrustfarmer {
         stake_amount: u128,
         farm_id: u128,
         status: CropStatus,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -107,7 +104,6 @@ mod greentrustfarmer {
         crop_id: u128,
         name: Vec<u8>,
         data: Vec<u8>,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -119,9 +115,7 @@ mod greentrustfarmer {
         id: u128,
         crop_id: u128,
         stakeholder: AccountId,
-        stake_amount: u128,
         status: StakeStatus,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -135,7 +129,6 @@ mod greentrustfarmer {
         challenger: AccountId,
         challenged: u128,
         status: ChallengeStatus,
-        is_valid: bool,
     }
 
     #[cfg_attr(
@@ -149,7 +142,6 @@ mod greentrustfarmer {
         name: Vec<u8>,
         current_address: Vec<u8>,
         id_cards: Vec<u8>,
-        is_valid: bool,
     }
 
     // == Variables ==
@@ -207,7 +199,10 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn update_farmer_profile(&mut self, profile: Vec<u8>, id_cards: Vec<u8>) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(farmer_id != 0, "F0");
             self.farmers.get(farmer_id).unwrap().profile = profile;
             self.farmers.get(farmer_id).unwrap().id_cards = id_cards;
@@ -217,7 +212,11 @@ mod greentrustfarmer {
         pub fn fetch_farmer_farms(&self, farmer_id: u128) -> Vec<Farm> {
             assert!(
                 farmer_id > 0 && farmer_id <= self.num_farmers
-                    || self.address_to_farmer_ids.get(self.env().caller()).unwrap() > 0,
+                    || self
+                        .address_to_farmer_ids
+                        .get(self.env().caller())
+                        .unwrap_or(0)
+                        > 0,
                 "F0"
             );
             let mut f_id = 0;
@@ -253,7 +252,10 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn fetch_farmer_stakes(&self) -> Vec<Stake> {
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0,
+                self.address_to_farmer_ids
+                    .get(self.env().caller())
+                    .unwrap_or(0)
+                    != 0,
                 "F0"
             );
             let mut stake_ids: Vec<u128> = Vec::new();
@@ -284,27 +286,28 @@ mod greentrustfarmer {
             location: Vec<u8>,
             documents: Vec<u8>,
         ) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(farmer_id != 0, "F0");
             self.num_farms += 1;
-            self.farms.get(self.num_farmers).unwrap().name = name;
-            self.farms.get(self.num_farmers).unwrap().size = size;
-            self.farms.get(self.num_farmers).unwrap().latitude = latitude;
-            self.farms.get(self.num_farmers).unwrap().longitude = longitude;
-            self.farms.get(self.num_farmers).unwrap().location = location;
-            self.farms.get(self.num_farmers).unwrap().documents = documents;
-            self.farms.get(self.num_farmers).unwrap().is_valid = true;
-            self.farms.get(self.num_farmers).unwrap().farmer_id = farmer_id;
+            let new_farm = Farm {
+                id: self.num_farms,
+                name: name,
+                size: size,
+                latitude: latitude,
+                longitude: longitude,
+                location: location,
+                documents: documents,
+                farmer_id: farmer_id,
+            };
+            self.farms.insert(&self.num_farms, &new_farm);
         }
 
         #[ink(message)]
         pub fn fetch_farm_crops(&self, farm_id: u128) -> Vec<Crop> {
-            assert!(
-                farm_id > 0
-                    && farm_id <= self.num_farms
-                    && self.farms.get(farm_id).unwrap().is_valid,
-                "F0"
-            );
+            assert!(farm_id > 0 && farm_id <= self.num_farms, "F0");
             let mut crop_ids: Vec<u128> = Vec::new();
             for i in 1..self.num_crops + 1 {
                 if self.crops.get(i).unwrap().farm_id == farm_id {
@@ -331,28 +334,30 @@ mod greentrustfarmer {
             stake_amount: u128,
             farm_id: u128,
         ) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(farmer_id != 0, "F0");
             assert!(
                 self.farms.get(farm_id).unwrap().farmer_id == farmer_id,
                 "F0C"
             );
             self.num_crops += 1;
-            self.crops.get(self.num_crops).unwrap().details = details;
-            self.crops.get(self.num_crops).unwrap().harvested_on = harvested_on;
-            self.crops.get(self.num_crops).unwrap().stake_amount = stake_amount;
-            self.crops.get(self.num_crops).unwrap().farm_id = farm_id;
-            self.crops.get(self.num_crops).unwrap().is_valid = true;
+            let new_crop = Crop {
+                id: self.num_crops,
+                details: details,
+                harvested_on: harvested_on,
+                stake_amount: stake_amount,
+                farm_id: farm_id,
+                status: CropStatus::default(),
+            };
+            self.crops.insert(&self.num_crops, &new_crop);
         }
 
         #[ink(message)]
         pub fn fetch_crop_sensors(&self, crop_id: u128) -> Vec<Sensor> {
-            assert!(
-                crop_id > 0
-                    && crop_id <= self.num_crops
-                    && self.crops.get(crop_id).unwrap().is_valid,
-                "Cr0"
-            );
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
             let mut sensor_ids: Vec<u128> = Vec::new();
             let mut crop_sensors = Vec::new();
 
@@ -371,12 +376,7 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn fetch_crop_stakes(&self, crop_id: u128) -> Vec<Stake> {
-            assert!(
-                crop_id > 0
-                    && crop_id <= self.num_crops
-                    && self.crops.get(crop_id).unwrap().is_valid,
-                "Cr0"
-            );
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
             let mut stake_ids: Vec<u128> = Vec::new();
             let mut crop_stakes = Vec::new();
 
@@ -397,8 +397,12 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn add_sensor(&mut self, crop_id: u128, name: Vec<u8>) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(farmer_id != 0, "F0");
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
             assert!(
                 self.farms
                     .get(self.crops.get(crop_id).unwrap().farm_id)
@@ -407,20 +411,24 @@ mod greentrustfarmer {
                     == farmer_id,
                 "F0S"
             );
-            assert!(self.crops.get(crop_id).unwrap().is_valid, "Cr0");
             self.num_sensors += 1;
-
-            self.sensors.get(self.num_sensors).unwrap().name = name;
-            self.sensors.get(self.num_sensors).unwrap().crop_id = crop_id;
-            self.sensors.get(self.num_sensors).unwrap().is_valid = true;
-            self.sensors.get(self.num_sensors).unwrap().id = self.num_sensors;
+            let new_sensor = Sensor {
+                id: self.num_sensors,
+                name: name,
+                data: "".as_bytes().to_vec(),
+                crop_id: crop_id,
+            };
+            self.sensors.insert(&self.num_sensors, &new_sensor);
         }
 
         #[ink(message)]
         pub fn add_sensor_data(&mut self, sensor_id: u128, data: Vec<u8>) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(farmer_id != 0, "F0");
-            assert!(self.sensors.get(sensor_id).unwrap().is_valid, "S0");
+            assert!(sensor_id > 0 && sensor_id <= self.num_sensors, "S0");
             assert!(
                 self.farms
                     .get(
@@ -458,23 +466,26 @@ mod greentrustfarmer {
             assert!(
                 self.address_to_verifier_ids
                     .get(self.env().caller())
-                    .unwrap()
+                    .unwrap_or(0)
                     == 0,
                 "V1"
             );
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()).unwrap() == 0,
+                self.address_to_farmer_ids
+                    .get(self.env().caller())
+                    .unwrap_or(0)
+                    == 0,
                 "F1"
             );
             self.num_verifiers += 1;
-            self.verifiers.get(self.num_verifiers).unwrap().name = name;
-            self.verifiers
-                .get(self.num_verifiers)
-                .unwrap()
-                .current_address = current_address;
-            self.verifiers.get(self.num_verifiers).unwrap().id_cards = id_cards;
-            self.verifiers.get(self.num_verifiers).unwrap().is_valid = true;
-            self.verifiers.get(self.num_verifiers).unwrap().id = self.num_verifiers;
+            let new_verifier = Verifier {
+                name: name,
+                current_address: current_address,
+                id_cards: id_cards,
+                id: self.num_verifiers,
+                wallet_address: self.env().caller(),
+            };
+            self.verifiers.insert(&self.num_verifiers, &new_verifier);
             self.address_to_verifier_ids
                 .insert(&self.env().caller(), &self.num_verifiers);
         }
@@ -484,20 +495,25 @@ mod greentrustfarmer {
             assert!(
                 self.address_to_verifier_ids
                     .get(self.env().caller())
-                    .unwrap()
+                    .unwrap_or(0)
                     == 0,
                 "V1"
             );
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()).unwrap() == 0,
+                self.address_to_farmer_ids
+                    .get(self.env().caller())
+                    .unwrap_or(0)
+                    == 0,
                 "F1"
             );
             self.num_farmers += 1;
-            self.farmers.get(self.num_farmers).unwrap().id = self.num_farmers;
-            self.farmers.get(self.num_farmers).unwrap().wallet_address = self.env().caller();
-            self.farmers.get(self.num_farmers).unwrap().profile = profile;
-            self.farmers.get(self.num_farmers).unwrap().id_cards = id_cards;
-            self.farmers.get(self.num_farmers).unwrap().is_valid = true;
+            let new_farmer = Farmer {
+                id: self.num_farmers,
+                wallet_address: self.env().caller(),
+                profile: profile,
+                id_cards: id_cards,
+            };
+            self.farmers.insert(&self.num_farmers, &new_farmer);
             self.address_to_farmer_ids
                 .insert(&self.env().caller(), &self.num_farmers);
         }
@@ -512,7 +528,7 @@ mod greentrustfarmer {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
-                .unwrap();
+                .unwrap_or(0);
             assert!(verifier_id != 0, "V0");
             self.verifiers.get(verifier_id).unwrap().name = name;
             self.verifiers.get(verifier_id).unwrap().current_address = current_address;
@@ -526,29 +542,36 @@ mod greentrustfarmer {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
-                .unwrap();
+                .unwrap_or(0);
             assert!(
                 verifier_id != 0
-                    || self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0,
+                    || self
+                        .address_to_farmer_ids
+                        .get(self.env().caller())
+                        .unwrap_or(0)
+                        != 0,
                 "U0"
             );
-            assert!(self.crops.get(challenged).unwrap().is_valid, "Cr0");
+            assert!(challenged > 0 && challenged <= self.num_crops, "Cr0");
             assert!(self.env().transferred_value() == self.challenge_amount);
             self.num_challenges += 1;
-            self.challenges.get(self.num_challenges).unwrap().id = self.num_challenges;
-            self.challenges.get(self.num_challenges).unwrap().challenger = self.env().caller();
-            self.challenges.get(self.num_challenges).unwrap().challenged = challenged;
-            self.challenges.get(self.num_challenges).unwrap().status = status;
-            self.challenges.get(self.num_challenges).unwrap().is_valid = true;
+            let new_challenge = Challenge {
+                id: self.num_challenges,
+                verifier_id: 0,
+                challenger: self.env().caller(),
+                challenged: challenged,
+                status: ChallengeStatus::default(),
+            };
+            self.challenges.insert(&self.num_challenges, &new_challenge);
         }
 
         #[ink(message)]
         pub fn has_staked(&mut self, crop_id: u128, wallet_address: AccountId) -> bool {
-            assert!(self.crops.get(crop_id).unwrap().is_valid, "Cr0");
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
             let mut has_stake: bool = false;
             for i in 1..self.num_stakes + 1 {
-                if (self.stakes.get(i).unwrap().crop_id == crop_id
-                    && self.stakes.get(i).unwrap().stakeholder == self.env().caller())
+                if self.stakes.get(i).unwrap().crop_id == crop_id
+                    && self.stakes.get(i).unwrap().stakeholder == self.env().caller()
                 {
                     has_stake = true;
                 }
@@ -558,17 +581,20 @@ mod greentrustfarmer {
 
         #[ink(message, payable)]
         pub fn add_stake(&mut self, crop_id: u128) {
-            let farmer_id = self.address_to_farmer_ids.get(self.env().caller()).unwrap();
+            let farmer_id = self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0);
             assert!(
                 farmer_id != 0
                     || self
                         .address_to_verifier_ids
                         .get(self.env().caller())
-                        .unwrap()
+                        .unwrap_or(0)
                         != 0,
                 "U0"
             );
-            assert!(self.crops.get(crop_id).unwrap().is_valid, "Cr0");
+            assert!(crop_id > 0 && crop_id <= self.num_crops, "Cr0");
             assert!(
                 self.crops.get(crop_id).unwrap().status == CropStatus::Open,
                 "Cr0"
@@ -587,20 +613,21 @@ mod greentrustfarmer {
             assert!(!self.has_staked(crop_id, self.env().caller()), "St1");
 
             // TODO: Check if the farmer has already staked for this crop - done
-
             self.num_stakes += 1;
-            self.stakes.get(self.num_stakes).unwrap().id = self.num_stakes;
-            self.stakes.get(self.num_stakes).unwrap().crop_id = crop_id;
-            self.stakes.get(self.num_stakes).unwrap().stakeholder = self.env().caller();
-            self.stakes.get(self.num_stakes).unwrap().status = StakeStatus::Staked;
-            self.stakes.get(self.num_stakes).unwrap().is_valid = true;
+            let new_stake = Stake {
+                id: self.num_stakes,
+                crop_id: crop_id,
+                stakeholder: self.env().caller(),
+                status: StakeStatus::default(),
+            };
+            self.stakes.insert(&self.num_stakes, &new_stake);
 
             // TODO: Put in has_staked - done
         }
 
         #[ink(message)]
         pub fn return_stake(&mut self, stake_id: u128) {
-            assert!(self.stakes.get(stake_id).unwrap().is_valid, "St0");
+            assert!(stake_id > 0 && stake_id <= self.num_stakes, "St0");
             assert!(
                 self.stakes.get(stake_id).unwrap().stakeholder == self.env().caller(),
                 "St0U"
@@ -663,9 +690,8 @@ mod greentrustfarmer {
             let verifier_id = self
                 .address_to_verifier_ids
                 .get(self.env().caller())
-                .unwrap();
+                .unwrap_or(0);
             assert!(verifier_id != 0, "U0V");
-            assert!(self.challenges.get(challenge_id).unwrap().is_valid, "Ch0");
             self.challenges.get(challenge_id).unwrap().status = ChallengeStatus::Alloted;
             self.challenges.get(challenge_id).unwrap().verifier_id = verifier_id;
         }
@@ -673,9 +699,7 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn fetch_challenge_details(&self, challenge_id: u128) {
             assert!(
-                challenge_id > 0
-                    && challenge_id <= self.num_challenges
-                    && self.challenges.get(challenge_id).unwrap().is_valid,
+                challenge_id > 0 && challenge_id <= self.num_challenges,
                 "Ch0"
             );
             self.challenges.get(challenge_id).unwrap();
@@ -683,7 +707,10 @@ mod greentrustfarmer {
 
         #[ink(message)]
         pub fn give_verdict(&mut self, challenge_id: u128, status: ChallengeStatus) {
-            assert!(self.challenges.get(challenge_id).unwrap().is_valid, "Ch0");
+            assert!(
+                challenge_id > 0 && challenge_id <= self.num_challenges,
+                "Ch0"
+            );
             assert!(
                 self.challenges.get(challenge_id).unwrap().status == ChallengeStatus::Alloted,
                 "Ch0S"
@@ -751,13 +778,30 @@ mod greentrustfarmer {
         #[ink(message)]
         pub fn fetch_user_type(&self) -> Vec<u8> {
             assert!(
-                self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0
-                    || self.address_to_verifier_ids.get(self.env().caller()).unwrap() != 0,
+                self.address_to_farmer_ids
+                    .get(self.env().caller())
+                    .unwrap_or(0)
+                    != 0
+                    || self
+                        .address_to_verifier_ids
+                        .get(self.env().caller())
+                        .unwrap_or(0)
+                        != 0,
                 "U0"
             );
-            if (self.address_to_farmer_ids.get(self.env().caller()).unwrap() != 0) {
+            if self
+                .address_to_farmer_ids
+                .get(self.env().caller())
+                .unwrap_or(0)
+                != 0
+            {
                 return "farmer".as_bytes().to_vec();
-            } else if (self.address_to_verifier_ids.get(self.env().caller()).unwrap() != 0) {
+            } else if self
+                .address_to_verifier_ids
+                .get(self.env().caller())
+                .unwrap_or(0)
+                != 0
+            {
                 return "verifier".as_bytes().to_vec();
             } else {
                 return "consumer".as_bytes().to_vec();
