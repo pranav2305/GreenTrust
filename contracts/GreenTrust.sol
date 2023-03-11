@@ -89,11 +89,6 @@ contract GreenTrust is GreenTrustFarmer {
         string memory description,
         string memory documents
     ) public payable {
-        require(
-            addressToFarmerIds[msg.sender] != 0 ||
-                addressToVerifierIds[msg.sender] != 0,
-            "U0"
-        );
         require(crops[_challenged].isValid, "Cr0");
         require(msg.value == challengeAmount, "CA0");
         numChallenges++;
@@ -133,6 +128,8 @@ contract GreenTrust is GreenTrustFarmer {
     function claimChallenge(uint256 _challengeId) public {
         require(addressToVerifierIds[msg.sender] != 0, "U0V");
         require(challenges[_challengeId].isValid, "Ch0");
+        require(challenges[_challengeId].status == defaultChallengeStatus, "Ch0S");
+        require(challenges[_challengeId].challenger != msg.sender, "Ch0U");
         challenges[_challengeId].status = ChallengeStatus.ALLOTTED;
         challenges[_challengeId].verifierId = addressToVerifierIds[msg.sender];
     }
@@ -151,11 +148,18 @@ contract GreenTrust is GreenTrustFarmer {
                 crops[stakes[_stakeId].cropId].harvestedOn + 90 days,
             "St0T"
         );
-        stakes[_stakeId].status = StakeStatus.RELEASED;
+        for (uint256 i = 1; i <= numStakes; i++) {
+            if (
+                stakes[i].cropId == stakes[_stakeId].cropId &&
+                stakes[i].status == defaultStakeStatus
+            ) {
+                stakes[_stakeId].status = StakeStatus.RELEASED;
+                payable(stakes[_stakeId].stakeholder).transfer(
+                    crops[stakes[_stakeId].cropId].stakeAmount
+                );
+            }
+        }
         crops[stakes[_stakeId].cropId].status = CropStatus.CLOSED;
-        payable(msg.sender).transfer(
-            crops[stakes[_stakeId].cropId].stakeAmount
-        );
     }
 
     function giveVerdict(uint256 _challengeId, ChallengeStatus _status) public {
@@ -205,9 +209,11 @@ contract GreenTrust is GreenTrustFarmer {
             }
         }
         Challenge[] memory cropChallenges = new Challenge[](tempNumChallenges);
-        for (uint256 i = 0; i < tempNumChallenges; i++) {
-            cropChallenges[j] = challenges[i];
-            j++;
+        for (uint256 i = 1; i <= numChallenges; i++) {
+            if (challenges[i].challenged == _cropId) {
+                cropChallenges[j] = challenges[i];
+                j++;
+            }
         }
         return cropChallenges;
     }

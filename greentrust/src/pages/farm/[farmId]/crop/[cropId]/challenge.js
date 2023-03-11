@@ -9,9 +9,10 @@ import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 import { CHALLENGE_AMOUNT } from "@/config";
+import profile from '@/../../public/lotties/profile-builder.json';
 
 export default function Challenge() {
-    
+
   const { loading, setLoading } = useContext(LoaderContext);
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
     const [challenge, setChallenge] = useState({});
@@ -39,54 +40,15 @@ export default function Challenge() {
     }, [])
 
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (docsHash) => {
+        await contractCall(auth, 'addChallenge', [
+            cropId,
+            challenge.description,
+            docsHash,
+            {value: CHALLENGE_AMOUNT}
+        ]);
 
-        if (supportingDocs.length == 0) {
-            setSnackbarInfo({
-                ...snackbarInfo,
-                open: true,
-                message: "Please upload a govt. issued ID card",
-            });
-            return;
-        }
-        const proofHashes = await uploadFile(supportingDocs.length == 1 ? [supportingDocs] : Object.values(supportingDocs));
-        let supportingDocsHashes = ''
-        proofHashes.forEach((hash) => {
-            supportingDocsHashes += hash[0].hash + ' '
-        });
-        if(auth.user){
-            postChallengeInfo(supportingDocsHashes);
-        }
-
-        console.log('debug:', challenge, supportingDocs[0]);
-    }
-
-    const postChallengeInfo = async (supportingDocs) => {
-        setLoading(true);
-
-        try {
-
-            console.log(cropId, challenge.description, supportingDocs , "Challenge data")
-            await contractCall(auth, 'addChallenge', [
-                cropId,
-                challenge.description,
-                supportingDocs,
-                {value: CHALLENGE_AMOUNT}
-            ]);
-
-            router.replace('/dashboard');
-        }
-        catch (err) {
-            console.log(err);
-            setSnackbarInfo({
-                ...snackbarInfo,
-                open: true,
-                message: `Registration failed`,
-            });
-        }
-
-        setLoading(false);
+        router.push('/dashboard');
     };
 
     return (<>
@@ -102,9 +64,11 @@ export default function Challenge() {
                     },
                     {
                         label: 'Supporting documents',
-                        id: 'pic',
                         isFile: true,
+                        isMultiple: true,
                         setFile: setSupportingDocs,
+                        file: supportingDocs,
+                        dataLabel: 'proofs'
                     },
                 ]}
                 setData={setChallenge}
@@ -112,7 +76,7 @@ export default function Challenge() {
             />}
             title="Raise a challenge"
             text="We appreciate your effort. Fill up the details asked and upload supporting documents. Your issue will be presented to a licensed verifier at the earliest. Thank you!"
-            image="/images/profile-builder.png"
+            image={profile}
         />
     </>)
 }

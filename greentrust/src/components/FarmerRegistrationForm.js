@@ -1,11 +1,14 @@
 import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
 
+import { useAuth } from "@/auth/useAuth";
+
  ;
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 import Form from "@/components/Form";
+import { LoaderContext } from "@/context/loaderContext";
 import InputBox from "./InputBox";
 import { useLocalStorage } from "hooks/useLocalStorage";
 import { useChain } from "@/context/chainContext";
@@ -13,7 +16,6 @@ import { useChain } from "@/context/chainContext";
 
 export default function FarmerRegistrationForm() {
     const { loading, setLoading } = useContext(LoaderContext);
-    const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
 
     const router = useRouter();
 
@@ -41,61 +43,22 @@ export default function FarmerRegistrationForm() {
         }
     }, [])
 
-
     const [data, setData] = useState({});
 
     const [pic, setPic] = useState([]);
     const [proofs, setProofs] = useState([]);
+    
+    const handleSubmit = async (picHash, docsHash) => {
+        data.profilePic = picHash;
 
+        console.log('debug:', data, docsHash);
+        
+        await contractCall(auth, 'registerFarmer', [
+            JSON.stringify(data),
+            docsHash,
+        ]);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        // Hashing pic
-        if (pic) {
-            await uploadFile([pic]).then((res) => {
-                data.profilePic = res[0][0].hash;
-            });
-        }
-
-        // Hashing IDs
-        if (proofs.length == 0) {
-            setSnackbarInfo({
-                ...snackbarInfo,
-                open: true,
-                message: "Please upload a govt. issued ID card",
-            });
-            return;
-        }
-        const proofHashes = await uploadFile(proofs.length == 1 ? [proofs] : Object.values(proofs));
-        let idCardHashes = ''
-        proofHashes.forEach((hash) => {
-            idCardHashes += hash[0].hash + ' '
-        });
-
-        postFarmerInfo(JSON.stringify(data), idCardHashes);
-    };
-
-    const postFarmerInfo = async (profile, idCardHashes) => {
-        setLoading(true);
-
-        try {
-            await contractCall(auth, 'registerFarmer', [
-                profile,
-                idCardHashes,
-            ]);
-
-            router.replace('/dashboard');
-        }
-        catch (err) {
-            setSnackbarInfo({
-                ...snackbarInfo,
-                open: true,
-                message: `Registration failed`,
-            });
-        }
-
-        setLoading(false);
+        router.replace('/dashboard');
     };
 
     return (
@@ -125,6 +88,7 @@ export default function FarmerRegistrationForm() {
                     id: 'pic',
                     isFile: true,
                     setFile: setPic,
+                    file: pic,
                 },
                 {
                     label: 'Document Proofs',
@@ -132,6 +96,8 @@ export default function FarmerRegistrationForm() {
                     isFile: true,
                     isMultiple: true,
                     setFile: setProofs,
+                    file: proofs,
+                    dataLabel: 'proofs' 
                 }
             ]}
             setData={setData}

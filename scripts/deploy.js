@@ -44,18 +44,19 @@ async function main() {
   });
 
   const config = fs.readFileSync('greentrust/src/config.js', 'utf-8');
-  const updatedConfig = `${config.split('\n')[0]}\nexport const CONTRACT_ADDRESS = "${greenTrust.address}";\n`
-
+  let updatedConfig = config.split('\n');
+  updatedConfig[updatedConfig.length - 1] = `export const CONTRACT_ADDRESS = "${greenTrust.address}"`;
+  updatedConfig = updatedConfig.join('\n');
   
   fs.writeFileSync("greentrust/src/config.js", updatedConfig, 'utf8', (err) => {
     console.log(err);
   });
   
-  try {
-    await mockData(greenTrust.address, abi);
-  } catch (err) {
-    console.log(err);
-  }
+  // try {
+  //   await mockData(greenTrust.address, abi);
+  // } catch (err) {
+  //   console.log(err);
+  // }
 }
 
 main()

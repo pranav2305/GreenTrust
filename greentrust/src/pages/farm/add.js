@@ -1,11 +1,17 @@
-import InputBox from "@/components/InputBox";
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
  ;import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
+import Form from "@/components/Form";
+import FormPage from "@/components/FormPage";
+import farmer from '@/../../public/lotties/farm.json';
+
 
 export default function Add() {
+  const [loading, setLoading] = useState(true);
+  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
+
   const router = useRouter();
   const { farmId, cropId } = router.query;
   
@@ -34,133 +40,90 @@ export default function Add() {
     e.preventDefault();
     console.log("Hello Frands");
 
-    if(ids.length == 0){
-      setSnackbarInfo({
-        ...snackbarInfo,
-        open: true,
-        message: `Please upload your ID card`,
-      });
-      return;
-    }
-    const fileHashes = await uploadFile(ids.length == 1 ? [ids] : Object.values(ids) );
-    console.log(fileHashes, "THESE ARE THE FILE HASHES")
-    var idCardsHash =""
-    fileHashes.forEach((fH) =>{
-      idCardsHash += fH[0].hash + " "
-    });
-    console.log(idCardsHash)
-
-
+  useEffect(() => {
     if (auth.user) {
-      postFarm(idCardsHash);
-    } else {
-      setSnackbarInfo({
-        ...snackbarInfo,
-        open: true,
-        message: `Sign in required`,
-      });
+      setLoading(false);
     }
-  };
+  }, [auth.user])
 
-  const postFarm = async (idCardsHash) => {
-    setLoading(true);
-
-    console.log("Adding Farm");
-    console.log(auth.user);
-
-    try {
-
-      const res = await contractCall(auth, "addFarm", [
-        farmDetails.size,
-        farmDetails.name,
-        farmDetails.latitute,
-        farmDetails.longitude,
-        farmDetails.location,
-        idCardsHash,
-      ]);
-
-      console.log(res.data, "Response");
-
-      setSnackbarInfo({
-        ...snackbarInfo,
-        open: true,
-        message: `Added Farm Successfully`,
-        severity: "success",
-      });
-
-      router.replace("/dashboard");
-    } catch (err) {
-      console.log(err);
-      setSnackbarInfo({
-        ...snackbarInfo,
-        open: true,
-        message: `Error ${err.code}: ${err.message}`,
-      });
+  useEffect(() => {
+    if (!auth.user) {
+      setLoading(true);
     }
-    setLoading(false);
-  };
-
-  const [file, setFile] = useState("");
+  }, [])
 
 
+  const [farmDetails, setFarmDetails] = useState({});
+  const [proofs, setProofs] = useState([]);
+  const [farmImage, setFarmImage] = useState([]);
+
+  const handleSubmit = async (imageHash, proofsHash) => {
+    proofsHash = JSON.parse(proofsHash)
+    proofsHash.farmImage = imageHash;
+    proofsHash = JSON.stringify(proofsHash);
+
+    await contractCall(auth, "addFarm", [
+      farmDetails.size,
+      farmDetails.name,
+      String(farmDetails.latitute),
+      String(farmDetails.longitude),
+      farmDetails.location,
+      proofsHash,
+    ]);
+
+    router.replace("/dashboard");
+  }
 
   return (
-    <div>
-      <div className="mb-6 font-comfortaa h-screen">
-        <form onSubmit={handleSubmit}>
-          <InputBox
-            label="Name"
-            onChange={(e) =>
-              setFarmDetails({ ...farmDetails, name: e.target.value })
-            }
-            placeHolder={"Farm name"}
-            type={"text"}
-          />
-          <InputBox
-            label="Size"
-            onChange={(e) =>
-              setFarmDetails({ ...farmDetails, size: e.target.value })
-            }
-            placeHolder={"Size (Acres)"}
-            type={"number"}
-          />
-          <InputBox
-            label="Location"
-            onChange={(e) =>
-              setFarmDetails({ ...farmDetails, location: e.target.value })
-            }
-            placeHolder={"Address"}
-            type={"text"}
-          />
-
-          {/* Currently not showing the location but the latitute and longitude get stored on click the button */}
-          <div>
-            <input
-              type="file"
-              multiple
-              onChange={e=>{setIds(e.target.files)}}
-              className="block w-fit bg-transparent text-gray-700 border border-darkGray rounded-xl rounded py-1 px-4 mb-2 leading-tight focus:bg-white"
-            />
-          </div>
-          <div className="flex space-x-3 my-5">
-            <p className="text-red-500 text-xs italic font-comfortaa">
-              Latitude : {farmDetails.latitute}
-            </p>
-            <p className="text-red-500 text-xs italic font-comfortaa">
-              Longitude : {farmDetails.longitude}
-            </p>
-          </div>
-
-          <div>
-            <button
-              className="bg-red-500 hover:bg-red-700 text-white bg-black font-bold py-2 px-4 rounded mb-3"
-              type="submit"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <FormPage
+      form={<Form
+        handleSubmit={handleSubmit}
+        fields={[
+          {
+            label: 'Name',
+            placeholder: `Jane's Farm`,
+          },
+          {
+            label: 'Size (in acres)',
+            dataLabel: 'size',
+            type: 'number'
+          },
+          {
+            label: 'Location',
+            placeholder: '1234 Main St'
+          },
+          {
+            label: 'Latitude',
+            placeholder: 'xx.xx',
+            type: 'number'
+          },
+          {
+            label: 'Longitude',
+            placeholder: 'xx.xx',
+            type: 'number'
+          },
+          {
+            label: 'Farm Image',
+            isFile: true,
+            isMultiple: false,
+            setFile: setFarmImage,
+            file: farmImage,
+          },
+          {
+            label: 'Document Proofs',
+            isFile: true,
+            isMultiple: true,
+            setFile: setProofs,
+            file: proofs,
+          }
+        ]}
+        setData={setFarmDetails}
+        data={farmDetails}
+      />}
+      title="Setup your farm"
+      text="Provide the details asked in the form."
+      image={farmer}
+      imageStyle="!max-w-[30vw]"
+    />
   );
 }

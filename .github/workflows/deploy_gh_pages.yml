@@ -1,0 +1,35 @@
+name: Deploy to gh-pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./greentrust
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install and build 🔧
+        run: |
+          npm install
+          npm run export
+          cd out
+          touch .nojekyll
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: greentrust/out
+          branch: gh-pages
+          clean-exclude: |
+            .nojekyll

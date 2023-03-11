@@ -1,7 +1,6 @@
 import CropCard from "@/components/CropCard";
-import FarmerDefaultCard from "@/components/FarmerInfoCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationDot, faChartPie } from "@fortawesome/free-solid-svg-icons";
+import { faLocationDot, faChartPie, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect, useContext } from "react";
 import { contractCall } from "@/utils";
 import { useRouter } from 'next/router'
@@ -10,6 +9,11 @@ import { LoaderContext } from "@/context/loaderContext";
 import Info from "@/components/Info";
 import Link from "next/link";
 import { AiFillPlusCircle } from "@react-icons/all-files/ai/AiFillPlusCircle";
+import IconButton from "@/components/IconButton";
+import Lottie from 'react-lottie-player'
+import farm from '../../../../public/lotties/farm.json'
+import Empty from "@/components/Empty";
+import FarmerCard from "@/components/FarmerInfoCard";
 
 export default function FarmInfo() {
 
@@ -28,7 +32,7 @@ export default function FarmInfo() {
   const [farmInfo, setFarmInfo] = useState(null);
   const [crops, setCrops] = useState([]);
   const [farmer, setFarmer] = useState(null);
-  const [hasAccess , setHasAccess] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
   const [farmerId, setFarmerId] = useState("");
   const fetchFarmInfo = async () => {
     setLoading(true);
@@ -36,25 +40,24 @@ export default function FarmInfo() {
     try {
       const farmRes = await contractCall(auth, 'farms', [farmId]);
       setFarmInfo(farmRes.data);
-      
+      console.log('farmRes debug:', farmRes.data);
+
       const cropsRes = await contractCall(auth, 'fetchFarmCrops', [farmId]);
       setCrops(cropsRes.data);
-      
       const farmerRes = await contractCall(auth, 'farmers', [parseInt(farmRes.data.farmerId._hex)]);
-      
+
       const res = await contractCall(auth, "fetchUserType");
       if (res.data == "farmer") {
         const farmerIdRes = await contractCall(auth, "addressToFarmerIds", [
           auth.user.address,
         ]);
-        console.log(farmRes.data.farmerId._hex)
-          console.log( farmerIdRes.data._hex , "\n\n HELLO \n")
-        if(parseInt(farmRes.data.farmerId._hex) == parseInt(farmerIdRes.data._hex)) {
+        if (parseInt(farmRes.data.farmerId._hex) == parseInt(farmerIdRes.data._hex)) {
           setHasAccess(true);
         }
       }
       setFarmer(farmerRes.data);
-    
+      console.log('farmer debug:', farmRes.data.profile)
+
     }
     catch (err) {
       setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
@@ -91,21 +94,25 @@ export default function FarmInfo() {
               <Info icon={faChartPie} text={`${farmInfo?.size} Acre`} style="text-gray" />
             </div>
             <div className="my-10">
-              {farmer && <FarmerDefaultCard
+              {farmer && <FarmerCard
                 profile={farmer.profile}
               />}
             </div>
-            <p className="w-fit font-bold text-2xl text-center text-primary font-comfortaa">
-              Crops {hasAccess ? <Link href={`/farm/${farmId}/crop/add`}><AiFillPlusCircle className="inline mb-1 text-darkGray" /></Link>:<div></div>}
-            </p>
-            {crops?.length > 0? cropList:<p className="text-darkGray font-comfortaa">No Crops registered</p> }
-            
+            <div className="flex flex-row gap-10 items-center mb-2">
+              <h2 className="mb-0">
+                Crops
+              </h2>
+              {hasAccess && <Link href={`/farm/${farmId}/crop/add`}><IconButton icon={faPlus} styles="!w-6 !h-6" /></Link>}
+            </div>
+            {crops?.length > 0 ? cropList : <Empty text="No crops registered " />}
+
           </div>
-          <div className="hidden lg:flex shrink min-w-[400px]">
-            <img
-              src="/images/farmer.png"
-              className="my-auto object-fill"
-            ></img>
+          <div className="hidden lg:flex shrink max-w-[30vw]">
+            <Lottie
+              loop
+              animationData={farm}
+              play
+              className="my-auto object-fill" />
           </div>
         </div>
       </div>
