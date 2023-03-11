@@ -1,8 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
-
-import { useAuth } from "@/auth/useAuth";
-import { LoaderContext } from "@/context/loaderContext";
+ ;import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
 import Form from "@/components/Form";
@@ -15,8 +13,32 @@ export default function Add() {
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
 
   const router = useRouter();
-
-  const auth = useAuth();
+  const { farmId, cropId } = router.query;
+  
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(function (position) {
+      setFarmDetails({
+        ...farmDetails,
+        latitute: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    });
+  }, []);
+  
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
+  const [farmDetails, setFarmDetails] = useState({});
+  const [ids, setIds] = useState([]);
+  const { loading, setLoading } = useContext(LoaderContext);
+  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Hello Frands");
 
   useEffect(() => {
     if (auth.user) {

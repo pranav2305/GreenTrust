@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
-import { useAuth } from "@/auth/useAuth";
-import { LoaderContext } from "@/context/loaderContext";
+ ;import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall } from "@/utils";
 import FormPage from "@/components/FormPage";
@@ -17,9 +16,17 @@ export default function Add() {
 
   const { farmId, cropId } = router.query;
 
-  const auth = useAuth();
-
-  const [data, setData] = useState({})
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
+  const [cropDetails, setCropDetails] = useState({})
+  const [harvestedOn, setHarvestedOn] = useState(0)
+  const [stakeAmount, setStakeAmount] = useState(0)
+  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
 
   const handleSubmit = async (e) => {
     const details = JSON.stringify({

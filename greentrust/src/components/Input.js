@@ -2,12 +2,18 @@ import React, { useState } from "react";
 
 import DropDown from "./DropDown";
 import InputBox from "./InputBox";
-import { useAuth } from "@auth/useAuth";
-import { contractCall } from "@/utils";
+import { AuthContext } from "@/context/authContext";
+ ;import { contractCall } from "@/utils";
 
 export default function Input() {
   
-  const auth = useAuth();
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
   
 
   
@@ -37,8 +43,8 @@ export default function Input() {
       name: name,
       size: size,
       createdOnDate: createdOnDate,
-      sowedOnDate:  Math.floor(new Date(sowedOnDate).getTime() / 1000),
-      harvestedOn :Math.floor(new Date(harvestedOn).getTime() / 1000),
+      sowedOnDate: sowedOnDate,
+      harvestedOn : harvestedOn,
       duration: duration,
     };
     console.log(details); 

@@ -14,6 +14,7 @@
 
 <li>Libraries/Tools</li>
     
+- [ink! Smart Contracts](https://use.ink/)
 - [React Icons](https://react-icons.github.io/react-icons")
 - [React Lottie](https://www.npmjs.com/package/react-lottie)
 - [IPFS](https://ipfs.tech/)
@@ -68,11 +69,6 @@ stakeholders, and alert stakeholders immediately of issues.
 ## Links
 
 - Figma - https://www.figma.com/file/QwfJiaDaLHx7Tav6Uwyiwf/GreenTrust?node-id=2%3A2&t=0jp5DXuTlfI99jiO-1
-
-## Network Diagram 
-
-![gt](https://user-images.githubusercontent.com/72497928/219967298-9968fab5-1913-48ad-a7d5-13e26acd6677.png)
-
 
 ## Team Members
 - Mehul Todi

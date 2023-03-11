@@ -3,7 +3,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot, faChartPie, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect, useContext } from "react";
 import { contractCall } from "@/utils";
-import { useAuth } from "@/auth/useAuth";
 import { useRouter } from 'next/router'
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
@@ -17,7 +16,14 @@ import Empty from "@/components/Empty";
 import FarmerCard from "@/components/FarmerInfoCard";
 
 export default function FarmInfo() {
-  const auth = useAuth();
+
+ const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
   const router = useRouter()
   const { farmId } = router.query
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);

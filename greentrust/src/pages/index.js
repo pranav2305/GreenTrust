@@ -5,46 +5,52 @@ import { useAuth } from "@/auth/useAuth";
 import { useEffect } from "react";
 import Spinner from "@/components/Spinner";
 
+const { Keyring } = require('@polkadot/keyring');
 import LandingNavbar from "@/components/LandingNavbar";
 import Button from "@/components/Button";
-import { contractCall } from "@/utils";
-import Head from "next/head";
+import { useChain } from "@/context/chainContext";
+import { useEstimationContext } from "@/context/estimationContext";
+import { useCallerContext } from "@/context/callerContext"; 
+import { useAccountsContext } from "@/context/accountContext";
+import { useEffect } from "react";
+import { contractCall } from "@/InkUtils";
+const { mnemonicGenerate } = require('@polkadot/util-crypto');
+import { useLocalStorage } from "hooks/useLocalStorage";
 
-import Lottie from "react-lottie-player";
-import farm from "@/../../public/lotties/farm.json";
+
 
 const Landing = () => {
+  const { api, contract } = useChain();
+  const { estimation } = useEstimationContext();
+  const { caller } = useCallerContext();
+  const { accounts } = useAccountsContext();
+  // const [mnemonic, setMnemonic] = useLocalStorage('mnemonic', {});
   const router = useRouter();
-  const auth = useAuth();
-
-  const onLogin = async () => {
-    try {
-      await auth.connect();
-      console.log("test", auth.user);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  const checkUser = async () => {
-    try {
-      const res = await contractCall(auth, "fetchUserType");
-      console.log(res.data, "Response");
-      if (res.data === "farmer" || res.data === "verifier") {
-        router.push("/dashboard");
-      } else {
-        router.push("/farms");
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   useEffect(() => {
-    if (!auth?.loading && auth?.isLoggedIn) {
-      checkUser();
-    }
-  }, [auth?.loading, auth?.isLoggedIn]);
+    console.log(api, contract, accounts, estimation, caller, "testing useEffect");
+    if (!api || !contract || !estimation || !caller) return;
+    console.log(contractCall({api: api, contract: contract, estimation: estimation, caller: caller}, "fetchUserType"), "contractCall testing");
+  }, [api, contract, estimation, caller, accounts])
+
+  console.log(api, contract, "testing");
+
+  async function registerUser() {
+    if(address!==null) {
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 2 });
+    const mnemonic = mnemonicGenerate();
+
+    console.log(mnemonic)
+    const pair = keyring.addFromUri(mnemonic, { name: 'kid-116' }, 'ed25519');
+    console.log(pair.address)
+    
+    // console.log(keypair);
+    // console.log(keypair.address);
+    localStorage.setItem('mnemonic', mnemonic);
+    localStorage.setItem('address', pair.address);
+    // setMnemonic(mnemonic)
+    router.push("/profile/role-choice")
+  }}
 
   return (
     <>
@@ -85,16 +91,9 @@ const Landing = () => {
                   your <span className="text-primary">organic produce</span>.
                 </p>
 
-                <div className="mt-6">
-                  <Button
-                    text={"Get Started"}
-                    styles={"!py-2 text-2xl"}
-                    onClick={onLogin}
-                  />
-                </div>
-              </div>
+            <div className="mt-6">
+              <Button text={"Get Started"} styles={"!py-2 text-2xl"} onClick={() => {registerUser()}} />
             </div>
-          </div>
 
           <div className="w-1/3 hidden md:flex ">
             <img

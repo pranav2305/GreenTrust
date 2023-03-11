@@ -2,15 +2,20 @@ import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
 
 import { contractCall } from "@/utils";
-import { useAuth } from "@/auth/useAuth";
-import { SnackbarContext } from "@/context/snackbarContext";
+ ;import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import FarmCard from "@/components/FarmCard";
 import Empty from "@/components/Empty";
 
 
 export default function Farms() {
-    const auth = useAuth();
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
     const { loading, setLoading } = useContext(LoaderContext);

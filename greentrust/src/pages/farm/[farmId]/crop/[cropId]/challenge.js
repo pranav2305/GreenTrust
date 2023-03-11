@@ -4,8 +4,7 @@ import FormPage from "@/components/FormPage";
 import Form from "@/components/Form";
 import { useRouter } from "next/router";
 import { useEffect, useContext, useState } from "react";
-import { useAuth } from "@/auth/useAuth";
-
+ ;
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall, uploadFile } from "@/utils";
@@ -20,10 +19,13 @@ export default function Challenge() {
     const [supportingDocs, setSupportingDocs] = useState([]);
     const router = useRouter();
     const {cropId} = router.query;
-    const auth = useAuth();
-
-    let data = {}
-    data.proofs = []
+   const auth = {
+    'api':api,
+    'contract':contract,
+    'address':address,
+    'gasLimit':3000n * 1000000n,
+    'storageDepositLimit': null
+  }
 
     useEffect(() => {
         if (auth.user) {
