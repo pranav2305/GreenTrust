@@ -3,15 +3,13 @@ import { useRouter } from 'next/router'
 import { useState } from "react";
 import { useContext } from "react";
 
-import { Auth, useAuth } from "@arcana/auth-react";
 import { CircularProgress } from "@mui/material";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 
 import Navbar from "./Navbar";
-import classes from "../style";
 import Spinner from "./Spinner";
-import { AuthContext } from "@/context/authContext";
+// import { AuthContext } from "@/context/authContext";
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { useChain } from "@/context/chainContext";
@@ -30,11 +28,11 @@ export function ArcanaAuth() {
     'storageDepositLimit': null
   }
   
-  const { loadingAuth, authProvider } = useContext(AuthContext);
+  // const { loadingAuth, authProvider } = useContext(AuthContext);
 
   return (
     <>
-      {loadingAuth || auth.loading
+      {auth.loading
         ? <CircularProgress size={24} co />
         : auth?.isLoggedIn
           ? <button

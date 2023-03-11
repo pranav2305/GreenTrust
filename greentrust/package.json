@@ -26,6 +26,7 @@
     "@polkadot/extension-dapp": "^0.44.8",
     "@polkadot/react-identicon": "^2.11.2",
     "@polkadot/util-crypto": "^10.4.1",
+    "@polywrap/client-js": "^0.9.6",
     "@pushprotocol/restapi": "^0.6.0",
     "@pushprotocol/uiembed": "^0.2.0",
     "@react-icons/all-files": "^4.1.0",
