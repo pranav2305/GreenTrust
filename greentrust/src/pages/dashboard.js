@@ -1,48 +1,36 @@
 import { useState, useEffect, useContext } from "react";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
  import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import VerifierDashboard from "@/components/VerifierDashboard";
 import FarmerDashboard from "@/components/FarmerDashboard";
-import Button from "@/components/Button";
+import { useAuth } from "@/context/authContext";
 
 
 export default function Dashboard() {
- const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
- 
-  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
   const { loading, setLoading } = useContext(LoaderContext);
-  const { api, contract } = useChain();
   const [userType, setUserType] = useState(null);
-  const [farms, setFarms] = useState(null);
-  const [stakes, setStakes] = useState(null);
+
+  const { auth, loaded } = useAuth();
 
   useEffect(() => {
     setLoading(true);
   }, [])
 
-  const auth = useAuth();
-
   useEffect(() => {
-    if (auth.user) {
-      console.log('debug:', auth.user);
-      setLoading(false);
-
+    if (loaded) {
       contractCall(auth, "fetchUserType")
-        .then((res) => setType(res.data));
+        .then((res) => {
+          setUserType(res.data)
+          setLoading(false);
+        });
     }
-  }, [auth?.user]);
+  }, [loaded]);
 
-  if (type == "farmer") {
+  if (userType == "farmer") {
     return <FarmerDashboard auth={auth} />;
   }
-  else if(type == "verifier"){
+  else if(userType == "verifier"){
     return <VerifierDashboard />;
   }
   else {

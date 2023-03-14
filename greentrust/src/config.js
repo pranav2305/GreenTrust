@@ -4,3 +4,7 @@ export const INK_ENDPOINT = "wss://shibuya-rpc.dwellir.com";
 export const INK_CONTRACT_ADDRESS = "ZH1fkRHd14rT2rTsHg2xcEVWR9ESAW8URV7sZWtUisr7ENE";
 export const CHALLENGE_AMOUNT = 1000000;
 export const STAKE_DURATION = 30;
+export const fnMap = {
+    "read": ["fetchUserType", "fetchAllFarms"],
+    "write": []
+}

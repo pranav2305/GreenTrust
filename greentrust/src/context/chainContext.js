@@ -16,7 +16,6 @@ function ChainProvider({ children }) {
   useEffect(() => {
     const wsProvider = new WsProvider(INK_ENDPOINT);
     ApiPromise.create({ provider: wsProvider }).then((api) => setApi(api));
-    // new ApiPromise(options({wsProvider})).then((api) => setApi(api));
   }, []);
 
   useEffect(() => {

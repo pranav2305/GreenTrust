@@ -1,83 +1,62 @@
 import { useEffect } from "react";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { useContext } from "react";
-
+import Skeleton from "@mui/material/Skeleton";
 import { CircularProgress } from "@mui/material";
-import Snackbar from '@mui/material/Snackbar';
-import Alert from '@mui/material/Alert';
-
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import Modal from "./Modal";
 import Navbar from "./Navbar";
 import Spinner from "./Spinner";
-// import { AuthContext } from "@/context/authContext";
 import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
-import { useChain } from "@/context/chainContext";
-import { useLocalStorage } from "hooks/useLocalStorage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useAuth } from "@/context/authContext";
+import { faUser } from "@fortawesome/free-regular-svg-icons";
+// import dynamic from "next/dynamic";
+// const Identicon = dynamic(() => import("@polkadot/react-identicon"));
+import AccountCard from "./AccountCard";
 
 export function ArcanaAuth() {
-  const [address, setAddress] = useLocalStorage('address');
-
   const router = useRouter();
-  const { api, contract } = useChain();
-  const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
-  
-  // const { loadingAuth, authProvider } = useContext(AuthContext);
+  const { auth, loaded } = useAuth();
 
   return (
     <>
-      {auth.loading
-        ? <CircularProgress size={24} co />
-        : auth?.isLoggedIn
-          ? <button
-            className="bg-primary text-white text-xl font-medium rounded-full w-[160px] py-[8px] whitespace-normal"
-            onClick={async () => {
-              await authProvider.init();
-              auth.logout();
-              router.push('/');
-            }}
-          >
-            Logout
-          </button>
-          : <button
-            className="bg-primary text-white text-xl font-medium rounded-full w-[160px] py-[8px] whitespace-normal"
-            onClick={() => router.push('/auth/login')}
-          >
-            Sign In
-          </button>
-      }
+      {!loaded ? (
+        <Skeleton variant="circular" width={44} height={44} />
+      ) : (
+        <Modal
+          anchor={
+            <div className="w-[44px] h-[44px] bg-primary rounded-full shadow-sm hover:scale-105 flex items-center justify-center">
+              {/* <Identicon
+              value={auth.caller.address}
+              size={32}
+              theme={"light"}
+            /> */}
+              <FontAwesomeIcon icon={faUser} className="text-white" />
+            </div>
+          }
+          popover={<AccountCard auth={auth} />}
+        />
+      )}
     </>
-  )
+  );
 }
 
 export default function Layout({ children }) {
-  const [address, setAddress] = useLocalStorage('address');
-  const { api, contract } = useChain();
-
- const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
-
-  const [loading, setLoading] = useState(false);
+  const { auth, loaded } = useAuth();
+  const { loading, setLoading } = useContext(LoaderContext);
 
   const [snackbarInfo, setSnackbarInfo] = useState({
     open: false,
     severity: "error",
-    message: ""
+    message: "",
   });
 
   const handleClose = () => {
-    setSnackbarInfo({...snackbarInfo, open: false});
+    setSnackbarInfo({ ...snackbarInfo, open: false });
   };
 
   return (
@@ -87,23 +66,17 @@ export default function Layout({ children }) {
         onClose={handleClose}
         autoHideDuration={6000}
       >
-        <Alert severity={snackbarInfo.severity}>
-          {snackbarInfo.message}
-        </Alert>
+        <Alert severity={snackbarInfo.severity}>{snackbarInfo.message}</Alert>
       </Snackbar>
       <div className="bg-white relative min-h-[100vh]">
-        <SnackbarContext.Provider value={{snackbarInfo, setSnackbarInfo}}>
+        <SnackbarContext.Provider value={{ snackbarInfo, setSnackbarInfo }}>
           <header>
             <Navbar />
           </header>
-          {loading && <Spinner></Spinner>}
-          <LoaderContext.Provider value={{ loading, setLoading }}>
-            <main className="h-full flex justify-center px-6 md:px-[12%] mb-24">
-              <div className="mt-8 h-full max-w-[1300px] w-full">
-                {children}
-              </div>
-            </main>
-          </LoaderContext.Provider>
+          {(loading || !loaded) && <Spinner></Spinner>}
+          <main className="h-full flex justify-center px-6 md:px-[12%] mb-24">
+            <div className="mt-8 h-full max-w-[1300px] w-full">{children}</div>
+          </main>
         </SnackbarContext.Provider>
       </div>
     </>

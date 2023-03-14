@@ -10,6 +10,8 @@ function CallerProvider({ children }) {
   useEffect(() => {
     if (accounts?.length > 0) {
       setCaller(accounts[0]);
+    } else {
+      setCaller(undefined);
     }
   }, [accounts]);
 

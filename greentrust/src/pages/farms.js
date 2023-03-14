@@ -1,61 +1,67 @@
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
-
-import { contractCall } from "@/utils";
- ;import { SnackbarContext } from "@/context/snackbarContext";
+import { useAuth } from "@/context/authContext";
+import { contractCall } from "@/InkUtils";
+import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import FarmCard from "@/components/FarmCard";
 import Empty from "@/components/Empty";
 
-
 export default function Farms() {
-   const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
 
-    const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
-    const { loading, setLoading } = useContext(LoaderContext);
+  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
+  const { loading, setLoading } = useContext(LoaderContext);
+  const { auth, loaded } = useAuth()
 
-    const [farms, setFarms] = useState(null);
+  const [farms, setFarms] = useState(null);
 
-    useEffect(() => {
-        if (auth.user) {
-            fetchFarms();
-        }
-    }, [auth?.user]);
+  useEffect(() => {
+    loaded && fetchFarms();
+  }, [loaded]);
 
-    const fetchFarms = async () => {
-        setLoading(true);
+  const fetchFarms = async () => {
+    setLoading(true);
 
-        try {
-            const res = await contractCall(auth, 'fetchAllFarms', []);
-            setFarms(res.data);
-        } catch (err) {
-            setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
-        }
+    try {
+      const res = await contractCall(auth, "fetchAllFarms", []);
+      console.log(res, "test farms")
+      setFarms(res.data);
+    } catch (err) {
+      setSnackbarInfo({
+        ...snackbarInfo,
+        open: true,
+        message: `Error ${err.code}: ${err.message}`,
+      });
+    }
 
-        setLoading(false);
-    };
+    setLoading(false);
+  };
 
-    useEffect(() => {
-        if (auth.user) {
-            fetchFarms();
-        }
-    }, [auth?.user]);
+  useEffect(() => {
+    if (auth.user) {
+      fetchFarms();
+    }
+  }, [auth?.user]);
 
-    return (
-        <div>
-            <h1>Registered Farms</h1>
-            <div className="  xs:flex xs:flex-col sm:grid sm:grid-cols-3 md:grid-cols-3 md:mx-0 lg:grid-cols-3 xl:grid-cols-4">
-                {farms && farms.length > 0 ? farms.map((farm, index) => {
-                    return <div className="p-4 mb-3 flex justify-center sm:flex sm:justify-center md:flex md:justify-between"><Link href={`/farm/${farm.id}`}> <FarmCard key={index} farm={farm} /></Link></div>
-                }) : <Empty text="No farms have been registered yet!" />
-                }
-            </div>
-        </div>
-    );
+  return (
+    <div>
+      <h1>Registered Farms</h1>
+      <div className="  xs:flex xs:flex-col sm:grid sm:grid-cols-3 md:grid-cols-3 md:mx-0 lg:grid-cols-3 xl:grid-cols-4">
+        {farms && farms.length > 0 ? (
+          farms.map((farm, index) => {
+            return (
+              <div className="p-4 mb-3 flex justify-center sm:flex sm:justify-center md:flex md:justify-between">
+                <Link href={`/farm/${farm.id}`}>
+                  {" "}
+                  <FarmCard key={index} farm={farm} />
+                </Link>
+              </div>
+            );
+          })
+        ) : (
+          <Empty text="No farms have been registered yet!" />
+        )}
+      </div>
+    </div>
+  );
 }

@@ -2,28 +2,32 @@ import {
     useEffect,
     useState,
     createContext,
-    ReactNode,
     useCallback,
     useContext,
   } from "react";
-  // import dynamic from 'next/dynamic'
-  // const web3Accounts = dynamic(() => import('@polkadot/extension-dapp'), { ssr: false });
-  // const web3Enable = dynamic(() => import('@polkadot/extension-dapp'), { ssr: false });
 
   const AccountsContext = createContext(undefined);
   
   function AccountsProvider({ children }) {
-    console.log("test accounts provider")
     const [accounts, setAccounts] = useState();
     const [signer, setSigner] = useState();
+    const [hasAccess, setHasAccess] = useState(false);
+    console.log("logout", accounts, signer, hasAccess);
+
+    function login() {
+      setHasAccess(true);
+    }
+
+    function logout() {
+      console.log("logout test");
+      setHasAccess(false);
+    }
 
     async function getExtension() {
       const { web3Enable } = await import(
         "@polkadot/extension-dapp"
       );
-      console.log("test get extension")
       const extensions = await web3Enable("green-trust");
-      console.log(extensions, "test extensions");
       return extensions.find((e) => e.name === "polkadot-js");
     }
 
@@ -40,10 +44,19 @@ import {
         setAccounts(acc);
       }
     }, [signer]);
+
+    useEffect(() => {
+      signer && setHasAccess(true);
+    }, [signer])
   
     useEffect(() => {
-      initAccounts()
-    }, [initAccounts, signer]);
+      if (hasAccess) {
+        initAccounts();
+      } else {
+        setAccounts(undefined);
+        setSigner(undefined);
+      }
+    }, [initAccounts, signer, hasAccess]);
   
     return (
       <AccountsContext.Provider
@@ -53,6 +66,8 @@ import {
           initAccounts,
           setSigner,
           signer,
+          login,
+          logout
         }}
       >
         {children}

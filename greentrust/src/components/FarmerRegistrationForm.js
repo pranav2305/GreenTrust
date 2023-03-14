@@ -1,47 +1,15 @@
 import { useEffect, useState, useContext } from "react";
 import { useRouter } from "next/router";
-
-import { useAuth } from "@/auth/useAuth";
-
- ;
-import { LoaderContext } from "@/context/loaderContext";
-import { SnackbarContext } from "@/context/snackbarContext";
-import { contractCall, uploadFile } from "@/utils";
+import { useAuth } from "@/context/authContext";
+import { contractCall } from "@/InkUtils";
 import Form from "@/components/Form";
 import { LoaderContext } from "@/context/loaderContext";
-import InputBox from "./InputBox";
-import { useLocalStorage } from "hooks/useLocalStorage";
-import { useChain } from "@/context/chainContext";
 
 
 export default function FarmerRegistrationForm() {
     const { loading, setLoading } = useContext(LoaderContext);
-
     const router = useRouter();
-
-    const {api, contract} = useChain();
-
-    const [address, setAddress] = useLocalStorage('address');
-
-   const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
-
-    useEffect(() => {
-        if (auth.user) {
-            setLoading(false);
-        }
-    }, [auth.user])
-
-    useEffect(() => {
-        if (!auth.user) {
-            setLoading(true);
-        }
-    }, [])
+    const  { auth, loaded } = useAuth();
 
     const [data, setData] = useState({});
 
