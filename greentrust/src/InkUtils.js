@@ -67,7 +67,7 @@ export const contractCall = async (auth, func, params = []) => {
     );
     const injector = await web3FromAddress(auth.caller.address)
   
-    tx.signAndSend(auth.caller.address, {
+    await tx.signAndSend(auth.caller.address, {
       signer: injector.signer
     }, async (res) => {
       if (res.status.isInBlock) {

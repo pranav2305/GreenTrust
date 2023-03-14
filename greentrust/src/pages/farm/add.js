@@ -1,25 +1,29 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import Form from "@/components/Form";
 import FormPage from "@/components/FormPage";
 import farmer from "@/../../public/lotties/farm.json";
 import { useAuth } from "@/context/authContext";
 
 export default function Add() {
-  const auth = useAuth();
+  const {auth} = useAuth();
   const [farmDetails, setFarmDetails] = useState({});
   const router = useRouter();
   const [proofs, setProofs] = useState([]);
   const [farmImage, setFarmImage] = useState([]);
 
   const handleSubmit = async (imageHash, proofsHash) => {
+    console.log("in handle submit", proofsHash);
     proofsHash = JSON.parse(proofsHash);
+    console.log(proofsHash, "in handle submit");
     proofsHash.farmImage = imageHash;
     proofsHash = JSON.stringify(proofsHash);
+    console.log(proofsHash, "in handle submit");
+    console.log(farmDetails, "in handle submit");
     await contractCall(auth, "addFarm", [
-      farmDetails.size,
       farmDetails.name,
+      Number(farmDetails.size),
       String(farmDetails.latitute),
       String(farmDetails.longitude),
       farmDetails.location,

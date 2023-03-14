@@ -21,7 +21,7 @@ config.autoAddCss = false;
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   return (
     <>

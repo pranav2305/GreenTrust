@@ -2,7 +2,7 @@ import CropCard from "@/components/CropCard";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationDot, faChartPie, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { useState, useEffect, useContext } from "react";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import { useRouter } from 'next/router'
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
@@ -14,16 +14,11 @@ import Lottie from 'react-lottie-player'
 import farm from '../../../../public/lotties/farm.json'
 import Empty from "@/components/Empty";
 import FarmerCard from "@/components/FarmerInfoCard";
+import { useAuth } from "@/context/authContext";
 
 export default function FarmInfo() {
 
- const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
+ const { auth, loaded } = useAuth()
   const router = useRouter()
   const { farmId } = router.query
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
@@ -44,14 +39,14 @@ export default function FarmInfo() {
 
       const cropsRes = await contractCall(auth, 'fetchFarmCrops', [farmId]);
       setCrops(cropsRes.data);
-      const farmerRes = await contractCall(auth, 'farmers', [parseInt(farmRes.data.farmerId._hex)]);
+      const farmerRes = await contractCall(auth, 'farmers', [farmRes.data.farmerId]);
 
       const res = await contractCall(auth, "fetchUserType");
       if (res.data == "farmer") {
         const farmerIdRes = await contractCall(auth, "addressToFarmerIds", [
-          auth.user.address,
+          auth.caller.address,
         ]);
-        if (parseInt(farmRes.data.farmerId._hex) == parseInt(farmerIdRes.data._hex)) {
+        if (farmRes.data.farmerId == farmerIdRes.data) {
           setHasAccess(true);
         }
       }
@@ -67,10 +62,10 @@ export default function FarmInfo() {
   }
 
   useEffect(() => {
-    if (auth.user) {
+    if (loaded) {
       fetchFarmInfo();
     }
-  }, [auth?.user])
+  }, [loaded])
 
   var element = crops?.map((cropDetails) => {
     return <CropCard cropDetails={cropDetails} />;
@@ -91,7 +86,7 @@ export default function FarmInfo() {
             </h1>
             <div className="flex flex-row gap-10">
               <Info icon={faLocationDot} text={farmInfo?.location} style="text-red" />
-              <Info icon={faChartPie} text={`${farmInfo?.size} Acre`} style="text-gray" />
+              <Info icon={faChartPie} text={`${farmInfo?.size_} Acre`} style="text-gray" />
             </div>
             <div className="my-10">
               {farmer && <FarmerCard
