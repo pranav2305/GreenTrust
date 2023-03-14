@@ -12,6 +12,7 @@ export default function Dashboard() {
   const [userType, setUserType] = useState(null);
 
   const { auth, loaded } = useAuth();
+  console.log(auth, loaded,"auth and laoded")
 
   useEffect(() => {
     setLoading(true);

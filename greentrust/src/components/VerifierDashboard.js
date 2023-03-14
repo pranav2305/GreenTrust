@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from "react";
 
-import { contractCall, getChallengeStatusCode } from "@/utils";
-import { useAuth } from "@/auth/useAuth";
+import { contractCall, getChallengeStatusCode } from "@/InkUtils";
+import { useAuth } from "@/context/authContext";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import ChallengeCard from "@/components/ChallengeCard";

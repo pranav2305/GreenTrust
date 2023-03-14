@@ -29,7 +29,7 @@ export default function Navar() {
       console.log(err);
     }
   };
-
+  console.log(isRegistered, "registered")
   useEffect(() => {
     loaded && checkUser();
   }, [loaded])

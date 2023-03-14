@@ -28,7 +28,8 @@ import {
         "@polkadot/extension-dapp"
       );
       const extensions = await web3Enable("green-trust");
-      return extensions.find((e) => e.name === "polkadot-js");
+      console.log(extensions, "test extension")
+      return extensions.find((e) => e.name === "polkadot-js" || e.name === "subwallet-js");
     }
 
     const initAccounts = useCallback(async () => {
@@ -41,6 +42,7 @@ import {
           "@polkadot/extension-dapp"
         );
         const acc = await web3Accounts();
+        console.log(acc, "test account")
         setAccounts(acc);
       }
     }, [signer]);

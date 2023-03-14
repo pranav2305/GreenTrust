@@ -21,6 +21,7 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@mui/material": "^5.11.9",
     "@next/font": "13.1.6",
+    "@opentelemetry/core": "^1.10.0",
     "@polkadot/api": "^9.14.1",
     "@polkadot/api-contract": "^9.14.1",
     "@polkadot/extension-dapp": "^0.44.8",
