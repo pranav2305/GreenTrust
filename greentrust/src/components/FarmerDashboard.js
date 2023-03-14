@@ -7,7 +7,7 @@ import CropDetailCard from "@/components/CropDetailCard";
 import IconButton from "@/components/IconButton";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { SnackbarContext } from "@/context/snackbarContext";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import CustomCarousel from "@/components/CustomCarousel";
 import Empty from "./Empty";
 
@@ -21,7 +21,7 @@ export default function FarmerDashboard({ auth }) {
   async function fetchDashboardDetails() {
     try {
       const farmerIdRes = await contractCall(auth, "addressToFarmerIds", [
-        auth.user.address,
+        auth.caller.address,
       ]);
       const farmsRes = await contractCall(auth, "fetchFarmerFarms", [
         farmerIdRes.data,
