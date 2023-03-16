@@ -24,7 +24,6 @@ export default function Farms() {
 
     try {
       const res = await contractCall(auth, "fetchAllFarms", []);
-      console.log(res, "test farms")
       setFarms(res.data);
     } catch (err) {
       setSnackbarInfo({

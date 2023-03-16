@@ -19,8 +19,6 @@ export default function FarmerRegistrationForm() {
     const handleSubmit = async (picHash, docsHash) => {
         data.profilePic = picHash;
 
-        console.log('debug:', data, docsHash);
-        
         await contractCall(auth, 'registerFarmer', [
             JSON.stringify(data),
             docsHash,
