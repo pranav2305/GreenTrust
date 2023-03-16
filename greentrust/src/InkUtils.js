@@ -6,6 +6,7 @@ const PROOFSIZE = new BN(1_000_000);
 
 export const contractCall = async (auth, func, params = []) => {
   if (!auth?.caller) {
+    console.log("auth debug:", auth);
     const error = Error("Unauthorized");
     error.code = 401;
     throw error;

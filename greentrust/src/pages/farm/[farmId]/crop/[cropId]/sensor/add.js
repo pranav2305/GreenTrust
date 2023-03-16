@@ -1,8 +1,9 @@
 import { useRouter } from "next/router";
 import { useEffect, useState, useContext } from "react";
- ;import { LoaderContext } from "@/context/loaderContext";
+
+import { useAuth } from "@/context/authContext";
 import { SnackbarContext } from "@/context/snackbarContext";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import FormPage from "@/components/FormPage";
 import Form from "@/components/Form";
 import plant from '@/../../public/lotties/plant.json';
@@ -14,16 +15,9 @@ export default function AddSensor() {
   const router = useRouter();
   const { farmId, cropId } = router.query;
 
-  const {  farmId,cropId } = router.query;
- const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
-  const [name , setName] = useState("");
-  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
+  const { auth } = useAuth();
+
+  const [data, setData] = useState({});
 
   const handleSubmit = async (e) => {
     await contractCall(auth, "addSensor", [cropId, data.name]);
