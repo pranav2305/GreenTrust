@@ -37,14 +37,6 @@ const GoogleTranslate = () => {
     };
 
     addScript();
-
-    events.on("routeChangeStart", removeScript);
-    events.on("routeChangeComplete", addScript);
-
-    return () => {
-      events.off("routeChangeStart", removeScript);
-      events.off("routeChangeComplete", addScript);
-    };
   }, []);
 
   useEffect(() => {
