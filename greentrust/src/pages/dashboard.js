@@ -5,6 +5,7 @@ import { LoaderContext } from "@/context/loaderContext";
 import VerifierDashboard from "@/components/VerifierDashboard";
 import FarmerDashboard from "@/components/FarmerDashboard";
 import { useAuth } from "@/context/authContext";
+import { useRouter } from "next/router";
 
 
 export default function Dashboard() {
@@ -13,16 +14,16 @@ export default function Dashboard() {
   const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
 
   const { auth, loaded } = useAuth();
-  console.log(auth, loaded, "test")
+
+  const router = useRouter();
 
   const getUserType = async () => {
     try {
-      console.log("fetching user type", auth)
       const res = await contractCall(auth, "fetchUserType");
+      console.log("user debug:", res);
       setUserType(res.data);
       setLoading(false);
     } catch (err) {
-      console.log(err);
       setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
     }
   }
@@ -44,6 +45,6 @@ export default function Dashboard() {
     return <VerifierDashboard />;
   }
   else {
-    return <></>
+    router.push('/farms');
   }
 }

@@ -12,21 +12,18 @@ function AccountsProvider({ children }) {
   const [accounts, setAccounts] = useState();
   const [signer, setSigner] = useState();
   const [hasAccess, setHasAccess] = useState(undefined);
-  console.log("logout", accounts, signer, hasAccess);
 
   function login() {
     setHasAccess(true);
   }
 
   async function logout() {
-    console.log("logout test");
     setHasAccess(false);
   }
 
   async function getExtension() {
     const { web3Enable } = await import("@polkadot/extension-dapp");
     const extensions = await web3Enable("green-trust");
-    console.log(extensions, "test extension");
     return extensions.find(
       (e) => e.name === "polkadot-js" || e.name === "subwallet-js"
     );
@@ -35,7 +32,6 @@ function AccountsProvider({ children }) {
   const initAccounts = useCallback(async () => {
     if (!signer) {
       const s = await getExtension();
-      console.log(s, "test signer");
       setSigner(s);
     } else {
       const { web3Accounts } = await import("@polkadot/extension-dapp");
