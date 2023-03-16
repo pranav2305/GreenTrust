@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { contractCall } from "@/InkUtils";
- import { SnackbarContext } from "@/context/snackbarContext";
+import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import VerifierDashboard from "@/components/VerifierDashboard";
 import FarmerDashboard from "@/components/FarmerDashboard";
@@ -20,9 +20,11 @@ export default function Dashboard() {
   const getUserType = async () => {
     try {
       const res = await contractCall(auth, "fetchUserType");
-      console.log("user debug:", res);
       setUserType(res.data);
       setLoading(false);
+      if (res.data == 'NR') {
+        router.push('/farms');
+      }
     } catch (err) {
       setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
     }
@@ -41,10 +43,7 @@ export default function Dashboard() {
   if (userType == "farmer") {
     return <FarmerDashboard auth={auth} />;
   }
-  else if(userType == "verifier"){
+  else if (userType == "verifier") {
     return <VerifierDashboard />;
-  }
-  else {
-    router.push('/farms');
   }
 }

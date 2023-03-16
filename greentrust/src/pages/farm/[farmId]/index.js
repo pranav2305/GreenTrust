@@ -35,7 +35,6 @@ export default function FarmInfo() {
     try {
       const farmRes = await contractCall(auth, 'farms', [farmId]);
       setFarmInfo(farmRes.data);
-      console.log('farmRes debug:', farmRes.data);
 
       const cropsRes = await contractCall(auth, 'fetchFarmCrops', [farmId]);
       setCrops(cropsRes.data);

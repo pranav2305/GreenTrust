@@ -14,13 +14,10 @@ export default function Add() {
   const [farmImage, setFarmImage] = useState([]);
 
   const handleSubmit = async (imageHash, proofsHash) => {
-    console.log("in handle submit", proofsHash);
     proofsHash = JSON.parse(proofsHash);
-    console.log(proofsHash, "in handle submit");
     proofsHash.farmImage = imageHash;
     proofsHash = JSON.stringify(proofsHash);
-    console.log(proofsHash, "in handle submit");
-    console.log(farmDetails, "in handle submit");
+    // console.log('farmDetails debug:', farmDetails);
     await contractCall(auth, "addFarm", [
       farmDetails.name,
       Number(farmDetails.size),
@@ -33,15 +30,15 @@ export default function Add() {
     router.replace("/dashboard");
   };
 
-  useEffect(() => {
-    navigator.geolocation.getCurrentPosition(function (position) {
-      setFarmDetails({
-        ...farmDetails,
-        latitute: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-    });
-  }, []);
+  // useEffect(() => {
+  //   navigator.geolocation.getCurrentPosition(function (position) {
+  //     setFarmDetails({
+  //       ...farmDetails,
+  //       latitute: position.coords.latitude,
+  //       longitude: position.coords.longitude,
+  //     });
+  //   });
+  // }, []);
 
   return (
     <FormPage

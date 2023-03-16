@@ -50,8 +50,6 @@ export default function Form({ handleSubmit, fields, setData, data }) {
                 }
             }
             catch (err) {
-                console.log(`form debug: ${err}`)
-
                 setSnackbarInfo({
                     ...snackbarInfo,
                     open: true,
