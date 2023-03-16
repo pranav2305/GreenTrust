@@ -44,9 +44,10 @@ export default function Navar() {
           </section>
         </div>
         <div className="flex flex-row gap-6 items-center">
-            <div id="google_translate_element" />
-            <GoogleTranslate />
-          <ArcanaAuth />
+          <GoogleTranslate />
+          <div className="hidden sm:flex">
+            <ArcanaAuth />
+          </div>
         </div>
       </nav>
       <nav>

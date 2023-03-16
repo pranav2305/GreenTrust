@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useRouter } from "next/router";
 
 import "@fortawesome/fontawesome-svg-core/styles.css";
@@ -35,7 +35,7 @@ export default function App({ Component, pageProps }) {
               <EstimationProvider>
                 <AuthProvider>
                   {router.pathname === "/auth/login" ||
-                  router.pathname === "/" ? (
+                    router.pathname === "/" ? (
                     <Component {...pageProps} />
                   ) : (
                     <Layout>

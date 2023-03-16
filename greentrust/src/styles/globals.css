@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Comfortaa&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -16,7 +16,7 @@ body > button[style] {
   @apply !w-24 !h-24 border-none;
 }
 body > button[style] > img {
-  @apply !w-fit
+  @apply !w-fit;
 }
 body > button[style] > button[style] {
   @apply -top-20;
@@ -59,7 +59,8 @@ body > button[style] > button[style] {
     @apply w-full flex justify-center flex-col items-center;
   }
 
-  input, textarea {
+  input,
+  textarea {
     @apply block w-full bg-transparent text-darkGray border border-darkGray font-bold py-2.5 px-5 mb-2 focus:bg-white focus:border-none outline-1 focus:outline-primary;
   }
   input {
@@ -67,6 +68,10 @@ body > button[style] > button[style] {
   }
   textarea {
     @apply rounded-none;
+  }
+
+  select {
+    @apply border-none outline-none;
   }
 }
 
@@ -91,7 +96,7 @@ body > button[style] > button[style] {
     @apply hidden;
   }
 
-  div#google_translate_element>div>span {
+  div#google_translate_element > div > span {
     @apply !hidden;
   }
 
@@ -99,7 +104,7 @@ body > button[style] > button[style] {
     font-size: 0;
   }
 
-  select.goog-te-combo{
+  select.goog-te-combo {
     @apply !hidden;
   }
 }
