@@ -4,22 +4,22 @@ import Link from "next/link";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faLocationDot,
-  faChartPie,
-  faQrcode,
-  faCircleXmark,
-  faMoneyBillWave,
-  faCoins,
-  faUnlock,
-  faHandHoldingDollar,
-  faShare,
-  faPlus,
+	faLocationDot,
+	faChartPie,
+	faQrcode,
+	faCircleXmark,
+	faMoneyBillWave,
+	faCoins,
+	faUnlock,
+	faHandHoldingDollar,
+	faShare,
+	faPlus,
 } from "@fortawesome/free-solid-svg-icons";
- ;
+;
 import SensorCard from "@/components/SensorCard";
 import FarmerCard from "@/components/FarmerInfoCard";
 import Button from "@/components/Button";
-import { CAROUSEL_RESPONSIVE_SETTINGS, contractCall, sendNotification } from "@/utils";
+import { CAROUSEL_RESPONSIVE_SETTINGS, contractCall, sendNotification } from "@/InkUtils";
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import Info from "@/components/Info";
@@ -39,49 +39,44 @@ import SensorGraph from "@/components/SensorGraph";
 
 import Lottie from "react-lottie-player";
 import plant from "../../../../../../public/lotties/plant.json";
+import { useAuth } from "@/context/authContext";
 
 const Crop = () => {
 	const router = useRouter();
 
 	const { farmId, cropId } = router.query;
 
-   const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
+	const { auth, loaded } = useAuth();
 
 	const [data, setData] = useState(null);
 
 	const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
 	var mockData = [
 		{
-		  time: 1676460952,
-		  data: {
-			temperature: 30,
-			humidity: 50,
-			light: 120,
-		  },
+			time: 1676460952,
+			data: {
+				temperature: 30,
+				humidity: 50,
+				light: 120,
+			},
 		},
 		{
-		  time: 1676633752,
-		  data: {
-			temperature: 50,
-			humidity: 10,
-			light: 100,
-		  },
+			time: 1676633752,
+			data: {
+				temperature: 50,
+				humidity: 10,
+				light: 100,
+			},
 		},
 		{
-		  time: 1676806552,
-		  data: {
-			temperature: 20,
-			humidity: 50,
-			light: 190,
-		  },
+			time: 1676806552,
+			data: {
+				temperature: 20,
+				humidity: 50,
+				light: 190,
+			},
 		},
-	  ];
+	];
 	const [hidden, setHidden] = useState(true);
 	const { loading, setLoading } = useContext(LoaderContext);
 	const [isFarmer, setIsFarmer] = useState(false);
@@ -91,7 +86,7 @@ const Crop = () => {
 	const [hasStaked, setHasStaked] = useState(false);
 	const [isInvalid, setIsInvalid] = useState(false);
 	const [sensorData, setSensorData] = useState(mockData);
-	
+
 	async function getCropDetails() {
 		setLoading(true);
 
@@ -102,6 +97,7 @@ const Crop = () => {
 		try {
 			res = await contractCall(auth, 'crops', [cropId]);
 			data.crop = { ...res.data, ...JSON.parse(res.data.details) }
+			console.log("res debug:", res);
 
 			data.farmId = Number(res.data.farmId);
 
@@ -140,27 +136,23 @@ const Crop = () => {
 			res = await contractCall(auth, "fetchUserType");
 			if (res.data == "farmer") {
 				const farmerIdRes = await contractCall(auth, "addressToFarmerIds", [
-					auth.user.address,
+					auth.caller.address,
 				]);
-				if (parseInt(data.farm.farmerId._hex) == parseInt(farmerIdRes.data._hex)) {
+				if (data.farm.farmerId == farmerIdRes.data) {
 					setHasAccess(true);
 				}
 			}
 			setData(data);
-			
-			if(data.sensors.length > 0){
-				
-				res = await contractCall(auth, "sensors", [parseInt(data.sensors[0].id._hex)]);
-				console.log("sensors", res.data.data);
-			}
-			
-			if(res.data.data != null){
-				console.log("sensors2", res.data.data);
 
+			if (data.sensors.length > 0) {
+
+				res = await contractCall(auth, "sensors", [parseInt(data.sensors[0].id._hex)]);
+			}
+
+			if (res.data.data != null) {
 				res = await fetch(`https://ipfs.io/ipfs/${res.data.data}`);
 				const sensorData = await res.json();
-				console.log("sensors1", sensorData);
-						setSensorData(sensorData);
+				setSensorData(sensorData);
 			}
 		}
 		catch (err) {
@@ -170,26 +162,26 @@ const Crop = () => {
 	}
 
 	useEffect(() => {
-		if (auth.user) {
+		if (loaded) {
 			getCropDetails();
 		}
-	}, [auth.user, auth.loading])
+	}, [loaded]);
 
 	return (<>{data && (
 		<div>
 			{isInvalid && <Alert severity="warning" className="mb-10 text-comfortaa fixed bottom-0 z-10 left-10">A challenge against this crop has be verified to be true</Alert>}
 			<div>
-            <div
-              className={
-                " fixed flex-col inset-0 z-10 backdrop-blur-xl space-y-4 shadow-2xl  h-screen w-screen justify-center items-center " +
-                (hidden ? "hidden" : "flex")
-              }
-            >
+				<div
+					className={
+						" fixed flex-col inset-0 z-10 backdrop-blur-xl space-y-4 shadow-2xl  h-screen w-screen justify-center items-center " +
+						(hidden ? "hidden" : "flex")
+					}
+				>
 
-			  <SensorGraph sensorData={sensorData} />
-			  <Button text={"Close"} onClick={() => setHidden(true)}>Close</Button>
+					<SensorGraph sensorData={sensorData} />
+					<Button text={"Close"} onClick={() => setHidden(true)}>Close</Button>
 
-            </div>
+				</div>
 				<Link href={'/farm/' + data.farmId}>
 					<h1>
 						{data.farm.name}
@@ -210,7 +202,7 @@ const Crop = () => {
 										<h2 className="mb-0">
 											{data.crop.name}
 										</h2>
-										<Modal 
+										<Modal
 											anchor={<FontAwesomeIcon
 												icon={faQrcode}
 												className="text-gray !w-[32px] !h-[32px]"
@@ -224,7 +216,7 @@ const Crop = () => {
 									</div>
 								</div>
 								<div>
-									{!hasAccess ?
+									{auth?.caller && !hasAccess ?
 										<Link href={`/farm/${farmId}/crop/${cropId}/challenge`}>
 											<Button
 												text="Challenge"
@@ -247,7 +239,7 @@ const Crop = () => {
 						</div>
 						<div className="grid grid-cols-1: sm:grid-cols-2 gap-10">
 							{data.sensors.length > 0 ? data.sensors.map((sensor) => (
-                      <SensorCard onClick={() => {setHidden(false)}} details={sensor} />)) :  <p className="text-gray text-center max-w-[200px]">No sensor added yet!</p>}
+								<SensorCard onClick={() => { setHidden(false) }} details={sensor} />)) : <p className="text-gray text-center max-w-[200px]">No sensor added yet!</p>}
 						</div>
 						<h3 className="mt-10 mb-0">
 							Stakeholders
@@ -258,7 +250,7 @@ const Crop = () => {
 								className="text-gray w-[26px] h-[26px] mr-4"
 							/>
 							&nbsp;
-							<p className=""><span className="text-primary font-semibold">{parseInt(data.crop.stakeAmount._hex)}/-</span> each</p>
+							<p className=""><span className="text-primary font-semibold">{data.crop.stakeAmount}/-</span> each</p>
 						</div>
 						<div>
 							<div className="flex my-3 gap-3">{data.stakeholders.map((stakeholder) => (
@@ -285,7 +277,7 @@ const Crop = () => {
 									/>
 									: <div></div>}
 
-								{true ?
+								{/* {true ?
 									<Button
 										text="Request Sponsorship"
 										icon={faCoins}
@@ -302,7 +294,7 @@ const Crop = () => {
 											setLoading(false);
 										}}
 									/>
-									: <div></div>}
+									: <div></div>} */}
 
 							</div>
 						</div>
@@ -312,11 +304,11 @@ const Crop = () => {
 					{data.challenges.length > 0 && <><h3>
 						Pending Challenges
 					</h3>
-					<div className="static my-8">
-						<CustomCarousel responsive={CAROUSEL_RESPONSIVE_SETTINGS}>{data.challenges?.map((challenge, index) => (
-							<ChallengeCard key={index} challenge={challenge} full={false} />
-						))}</CustomCarousel>
-					</div>
+						<div className="static my-8">
+							<CustomCarousel responsive={CAROUSEL_RESPONSIVE_SETTINGS}>{data.challenges?.map((challenge, index) => (
+								<ChallengeCard key={index} challenge={challenge} full={false} />
+							))}</CustomCarousel>
+						</div>
 					</>}
 				</div>
 			</div>

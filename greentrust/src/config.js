@@ -5,6 +5,19 @@ export const INK_CONTRACT_ADDRESS = "ZH1fkRHd14rT2rTsHg2xcEVWR9ESAW8URV7sZWtUisr
 export const CHALLENGE_AMOUNT = 1000000;
 export const STAKE_DURATION = 30;
 export const fnMap = {
-    "read": ["fetchUserType", "fetchAllFarms", "addressToFarmerIds", "fetchFarmerFarms", "fetchFarmerStakes", "crops", "farms", "fetchFarmCrops", "farmers"],
+    "read": [
+        "fetchUserType",
+        "fetchAllFarms",
+        "addressToFarmerIds",
+        "fetchFarmerFarms",
+        "fetchFarmerStakes",
+        "crops",
+        "farms",
+        "fetchFarmCrops",
+        "farmers",
+        "fetchCropStakes",
+        "fetchCropSensors",
+        "fetchCropChallenges"
+    ],
     "write": []
 }
