@@ -267,7 +267,7 @@ const Crop = () => {
 											setLoading(true);
 
 											try {
-												await contractCall(auth, 'addStake', [cropId, { value: parseInt(data.crop.stakeAmount._hex) }])
+												await contractCall(auth, 'addStake', [cropId])
 											}
 											catch (err) {
 												setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
