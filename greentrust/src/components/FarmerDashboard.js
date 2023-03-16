@@ -10,6 +10,7 @@ import { SnackbarContext } from "@/context/snackbarContext";
 import { contractCall } from "@/InkUtils";
 import CustomCarousel from "@/components/CustomCarousel";
 import Empty from "./Empty";
+import Carousel from "react-multi-carousel";
 
 
 export default function FarmerDashboard({ auth }) {
@@ -28,7 +29,7 @@ export default function FarmerDashboard({ auth }) {
       ]);
       setFarms(farmsRes.data);
 
-      const stakesRes = await contractCall(auth, "fetchFarmerStakes");
+      const stakesRes = await contractCall(auth, "fetchFarmerStakes", []);
       let farmerStakes = [];
       for (let i = 0; i < stakesRes.data.length; i++) {
         const stake = stakesRes.data[i];
@@ -93,9 +94,19 @@ export default function FarmerDashboard({ auth }) {
     <div>
       <section className="mb-10">
         <div className="flex flex-row gap-10">
-          <h1>My Farms</h1>
+          <h1>
+            My Farms
+          </h1>
           <Link href="/farm/add"><IconButton icon={faPlus} /></Link>
         </div>
+        {/* <Carousel responsive={farmerCardsResponsive}>
+          {farms?.map((farm) => (
+            <FarmCard
+              farm={farm}
+              key={farm.id}
+            />
+          ))}
+        </Carousel> */}
         {farms.length > 0 ? <CustomCarousel responsive={farmerCardsResponsive} >
           {farms?.map((farm) => (
             <FarmCard

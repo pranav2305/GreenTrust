@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { config } from "@fortawesome/fontawesome-svg-core";
+import "react-multi-carousel/lib/styles.css";
 
 import { APP_ADDRESS } from "@/config";
 import Layout from "@/components/Layout";
