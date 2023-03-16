@@ -93,33 +93,26 @@ export default function FarmerDashboard({ auth }) {
     <div>
       <section className="mb-10">
         <div className="flex flex-row gap-10">
-          <h1>
-            My Farms
-          </h1>
+          <h1>My Farms</h1>
           <Link href="/farm/add"><IconButton icon={faPlus} /></Link>
         </div>
-        <div className="static">
-          {farms.length > 0 ? <CustomCarousel responsive={farmerCardsResponsive} >
-            {farms?.map((farm) => (
-              <FarmCard
-                farm={farm}
-                key={farm.id}
-              />
-            ))}
-          </CustomCarousel> : <Empty text="No farms registered yet!" />}
-        </div>
+        {farms.length > 0 ? <CustomCarousel responsive={farmerCardsResponsive} >
+          {farms?.map((farm) => (
+            <FarmCard
+              farm={farm}
+              key={farm.id}
+            />
+          ))}
+        </CustomCarousel> : <Empty text="No farms registered yet!" />}
       </section>
 
       <section>
         <h2>Staked Crops</h2>
-
-        <div className="static">
-          {stakes.length > 0 ? <CustomCarousel responsive={cropCardsResponsive} >
-            {stakes?.map((stake) => (
-                <CropDetailCard stake={stake} />
-            ))}
-          </CustomCarousel> : <Empty text="You haven't sponsored any farms yet" />}
-        </div>
+        {stakes.length > 0 ? <CustomCarousel responsive={cropCardsResponsive} >
+          {stakes?.map((stake) => (
+              <CropDetailCard stake={stake} />
+          ))}
+        </CustomCarousel> : <Empty text="You haven't sponsored any farms yet" />}
       </section>
     </div>
   );

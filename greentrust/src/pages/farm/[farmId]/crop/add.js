@@ -1,8 +1,10 @@
 import { useRouter } from "next/router";
-import { useEffect, useState, useContext } from "react";
- ;import { LoaderContext } from "@/context/loaderContext";
+import { useState, useContext } from "react";
+
+import { useAuth } from "@/context/authContext";
+import { LoaderContext } from "@/context/loaderContext";
 import { SnackbarContext } from "@/context/snackbarContext";
-import { contractCall } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import FormPage from "@/components/FormPage";
 import Form from "@/components/Form";
 import plant from '@/../../public/lotties/plant.json';
@@ -16,17 +18,9 @@ export default function Add() {
 
   const { farmId, cropId } = router.query;
 
- const auth = {
-    'api':api,
-    'contract':contract,
-    'address':address,
-    'gasLimit':3000n * 1000000n,
-    'storageDepositLimit': null
-  }
-  const [cropDetails, setCropDetails] = useState({})
-  const [harvestedOn, setHarvestedOn] = useState(0)
-  const [stakeAmount, setStakeAmount] = useState(0)
-  const { snackbarInfo, setSnackbarInfo } = useContext(SnackbarContext);
+  const { auth } = useAuth();
+
+  const [data, setData] = useState({})
 
   const handleSubmit = async (e) => {
     const details = JSON.stringify({
@@ -36,11 +30,12 @@ export default function Add() {
       size: data.size
     });
 
+    console.log("details debug:", details)
     const res = await contractCall(auth, "addCrop", [
       details,
       0,
-      farmId,
-      data.stakeAmount
+      Number(data.stakeAmount),
+      Number(farmId),
     ]);
 
     router.push('/farm/' + farmId);
@@ -61,7 +56,7 @@ export default function Add() {
             dataLabel: 'sowedOn'
           },
           {
-            label: 'Stake amount (in Wei)',
+            label: 'Stake amount (in SBY)',
             type: 'number',
             dataLabel: 'stakeAmount'
           },

@@ -5,8 +5,8 @@ import IconButton from "./IconButton";
 
 
 export default function CustomCarousel({ children, responsive }) {
-  return (<Carousel
-    className="!overflow-visible"
+  return (<div className="static"><Carousel
+    className="overflow-visible"
     swipeable={true}
     draggable={false}
     // showDots={true}
@@ -25,5 +25,5 @@ export default function CustomCarousel({ children, responsive }) {
     // renderDotsOutside={true}
   >
     {children}
-  </Carousel>);
+  </Carousel></div>);
 }
