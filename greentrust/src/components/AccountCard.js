@@ -8,15 +8,17 @@ export default function AccountCard({ auth }) {
   const { logout } = useAccountsContext();
   const router = useRouter();
 
+  const address = auth?.caller?.address;
+
   return (
     <div className="p-5 rounded-lg">
-      <div className="mb-4">
+      <div className="mb-0">
         <p className="text-darkGray text-base font-bold">
-          {auth?.caller?.address}
+          {address.slice(0, 5) + '...' + address.slice(-5)}
         </p>
         {/* <p className="text-gray text-sm font-bold text-ellipsis overflow-hidden whitespace-nowrap" title={auth.user?.email}>{auth.user?.email}</p> */}
       </div>
-      <div className="flex flex-row justify-around items-center">
+      {/* <div className="flex flex-row justify-around items-center">
         <FontAwesomeIcon
           icon={faGear}
           className="text-primary text-xl cursor-pointer hover:scale-105"
@@ -29,7 +31,7 @@ export default function AccountCard({ auth }) {
             router.push("/");
           }}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

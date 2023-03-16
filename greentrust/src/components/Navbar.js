@@ -35,12 +35,11 @@ export default function Navar() {
   }, [loaded])
 
   return (
-    <div className="px-0 md:px-[10%] flex justify-center">
+    <div className="px-0 md:px-[10%] fixed sm:flex justify-center w-full z-50">
       <nav className="mt-0 md:mt-6 bg-white border-gray-200 px-6 md:px-20 py-3 rounded-none md:rounded-full drop-shadow-2xl w-full max-w-[1400px] flex flex-row items-center justify-between">
         <div className="flex flex-row gap-12 items-center">
           <Logo />
-          <section className="flex flex-row gap-4">
-
+          <section className="hidden sm:flex flex-row gap-4">
             <NavbarLink link="/dashboard" icon={faHouse} tooltip="Home" />
             <NavbarLink link="/farms" icon={faTractor} tooltip="Farms" />
             {(loaded && !isRegistered) && <NavbarLink link="/profile/role-choice" icon={faIdCard} tooltip="Register" />}
@@ -51,6 +50,13 @@ export default function Navar() {
             <GoogleTranslate />
           <ArcanaAuth />
         </div>
+      </nav>
+      <nav>
+        <section className="fixed bottom-0 flex flex-row sm:hidden justify-around w-full bg-white py-3 px-12 shadow-inner rounded-t-xl">
+          <NavbarLink link="/dashboard" icon={faHouse} tooltip="Home" />
+          <NavbarLink link="/farms" icon={faTractor} tooltip="Farms" />
+          {(loaded && !isRegistered) && <NavbarLink link="/profile/role-choice" icon={faIdCard} tooltip="Register" />}
+        </section>
       </nav>
     </div>
   );

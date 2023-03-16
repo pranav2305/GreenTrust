@@ -24,23 +24,25 @@ export function ArcanaAuth() {
 
   return (
     <>
-      {!loaded ? (
-        <Skeleton variant="circular" width={44} height={44} />
-      ) : (
-        <Modal
-          anchor={
-            <div className="w-[44px] h-[44px] bg-primary rounded-full shadow-sm hover:scale-105 flex items-center justify-center">
-              {/* <Identicon
-              value={auth.caller.address}
-              size={32}
-              theme={"light"}
-            /> */}
-              <FontAwesomeIcon icon={faUser} className="text-white" />
-            </div>
-          }
-          popover={<AccountCard auth={auth} />}
-        />
-      )}
+      <div className="static">
+        {!loaded ? (
+          <Skeleton variant="circular" width={44} height={44} />
+        ) : (
+          <Modal
+            anchor={
+              <div className="w-[44px] h-[44px] bg-primary rounded-full shadow-sm hover:scale-105 flex items-center justify-center">
+                {/* <Identicon
+                value={auth.caller.address}
+                size={32}
+                theme={"light"}
+              /> */}
+                <FontAwesomeIcon icon={faUser} className="text-white" />
+              </div>
+            }
+            popover={<AccountCard auth={auth} />}
+          />
+        )}
+      </div>
     </>
   );
 }
