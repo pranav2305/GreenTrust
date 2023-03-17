@@ -32,10 +32,10 @@ mod greentrustfarmer {
         #[default]
         Staked,
         Released,
-        Unsuccesful,
+        Unsuccessful,
     }
 
-    #[derive(scale::Encode, scale::Decode, Default, PartialEq)]
+    #[derive(scale::Encode, scale::Decode, Clone, Copy, Default, PartialEq)]
     #[cfg_attr(
         feature = "std",
         derive(scale_info::TypeInfo, ink::storage::traits::StorageLayout)
@@ -45,7 +45,7 @@ mod greentrustfarmer {
         Open,
         Alloted,
         Rejected,
-        Succesful,
+        Successful,
     }
 
     // == Structs ==
@@ -483,19 +483,6 @@ mod greentrustfarmer {
             description: Vec<u8>,
             documents: Vec<u8>,
         ) {
-            let verifier_id = self
-                .address_to_verifier_ids_map
-                .get(self.env().caller())
-                .unwrap_or(0);
-            assert!(
-                verifier_id != 0
-                    || self
-                        .address_to_farmer_ids_map
-                        .get(self.env().caller())
-                        .unwrap_or(0)
-                        != 0,
-                "U0"
-            );
             assert!(challenged > 0 && challenged <= self.num_crops, "Cr0");
             assert!(self.env().transferred_value() == self.challenge_amount);
             self.num_challenges += 1;
@@ -620,11 +607,14 @@ mod greentrustfarmer {
                         .harvested_on
                         + 90 * 24 * 60 * 60
             );
-            self.stakes_map.get(stake_id).unwrap().status = StakeStatus::Released;
-            self.crops_map
+            let mut stake = self.stakes_map.get(stake_id).unwrap();
+            stake.status = StakeStatus::Released;
+            self.stakes_map.insert(stake_id, &stake);
+            let mut crop = self.crops_map
                 .get(self.stakes_map.get(stake_id).unwrap().crop_id)
-                .unwrap()
-                .status = CropStatus::Closed;
+                .unwrap();
+            crop.status = CropStatus::Closed;
+            self.crops_map.insert(self.stakes_map.get(stake_id).unwrap().crop_id, &crop);
             if self
                 .env()
                 .transfer(
@@ -654,20 +644,15 @@ mod greentrustfarmer {
                 self.challenges_map.get(challenge_id).unwrap().status == ChallengeStatus::Open,
                 "Ch0S"
             );
-            assert!(
-                self.address_to_verifier_ids_map
-                    .get(self.env().caller())
-                    .unwrap_or(0)
-                    != 0,
-                "Ch0V"
-            );
             let verifier_id = self
                 .address_to_verifier_ids_map
                 .get(self.env().caller())
                 .unwrap_or(0);
-            assert!(verifier_id != 0, "U0V");
-            self.challenges_map.get(challenge_id).unwrap().status = ChallengeStatus::Alloted;
-            self.challenges_map.get(challenge_id).unwrap().verifier_id = verifier_id;
+            assert!(verifier_id != 0, "Ch0V");
+            let mut challenge = self.challenges_map.get(challenge_id).unwrap();
+            challenge.status = ChallengeStatus::Alloted;
+            challenge.verifier_id = verifier_id;
+            self.challenges_map.insert(challenge_id, &challenge);
         }
 
         #[ink(message)]
@@ -705,15 +690,24 @@ mod greentrustfarmer {
                     != CropStatus::Closed,
                 "Ch0C"
             );
-            if status == ChallengeStatus::Succesful {
-                self.crops_map
+            let mut challenge = self.challenges_map.get(challenge_id).unwrap();
+            challenge.status = status;
+            self.challenges_map.insert(challenge_id, &challenge);
+            if status == ChallengeStatus::Successful {
+                let mut crop = self.crops_map
                     .get(self.challenges_map.get(challenge_id).unwrap().challenged)
-                    .unwrap()
-                    .status = CropStatus::Closed;
+                    .unwrap();
+                crop.status = CropStatus::Closed;
+                self.crops_map.insert(
+                    self.challenges_map.get(challenge_id).unwrap().challenged,
+                    &crop,
+                );
                 let mut temp_num_stakes: u128 = 0;
                 for i in 1..self.num_stakes + 1 {
                     temp_num_stakes += 1;
-                    self.stakes_map.get(i).unwrap().status = StakeStatus::Unsuccesful;
+                    let mut stake = self.stakes_map.get(i).unwrap();
+                    stake.status = StakeStatus::Unsuccessful;
+                    self.stakes_map.insert(i, &stake);
                 }
                 if self
                     .env()
