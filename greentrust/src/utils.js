@@ -214,45 +214,20 @@ export const sendNotificationAll = async (signer, title, body) => {
 
 export const getChallengeStatusCode = (status) => {
   const map = {
-    OPEN: 0,
-    ALLOTED: 1,
-    REJECTED: 2,
-    SUCCESSFUL: 3,
+    OPEN: "Open",
+    ALLOTED: "Alloted",
+    REJECTED: "Rejected",
+    SUCCESSFUL: "Successful",
   };
   return map[status];
 };
 
-export const getChallengeStatus = (code) => {
-  const map = {
-    0: "OPEN",
-    1: "ALLOTED",
-    2: "REJECTED",
-    3: "SUCCESSFUL",
-  };
-  return map[code];
-};
-
-export const getStatusCode = (code, type = 0) => {
-  const map = {
-    0: "OPEN",
-    1: "LOCKED",
-    2: "CLOSED",
-  };
-
-  const colourMap = {
-    0: "bg-primary",
-    1: "bg-yellow",
-    2: "bg-red"
-  }
-  return type ? colourMap[code]:map[code];
-}
-
 export const getStatusColor = (code) => {
   const map = {
-    0: "border-yellow",
-    1: "border-blue",
-    2: "border-red",
-    3: "border-primary",
+    "Open": "border-yellow",
+    "Alloted": "border-blue",
+    "Rejected": "border-red",
+    "Successful": "border-primary",
   };
   return map[code];
 };

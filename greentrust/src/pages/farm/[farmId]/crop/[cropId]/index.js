@@ -148,12 +148,9 @@ const Crop = () => {
 			if (data.sensors.length > 0) {
 				res = await contractCall(auth, "sensors", [data.sensors[0].id]);
 			}
-			console.log(res, "test")
 			if (res.data.data) {
 				res = await fetch(`https://ipfs.io/ipfs/${res.data.data}`);
-				console.log(res, "test")
 				const sensorData = await res.json();
-				console.log(sensorData, "test")
 				setSensorData(sensorData);
 			}
 		}
