@@ -15,7 +15,6 @@ import { AccountsProvider } from "@/context/accountContext";
 import { LoaderContext } from "@/context/loaderContext";
 import { CallerProvider } from "@/context/callerContext";
 import { ChainProvider } from "@/context/chainContext";
-import { EstimationProvider } from "@/context/estimationContext";
 import { AuthProvider } from "@/context/authContext";
 
 config.autoAddCss = false;
@@ -33,18 +32,16 @@ export default function App({ Component, pageProps }) {
         <ChainProvider>
           <AccountsProvider>
             <CallerProvider>
-              <EstimationProvider>
-                <AuthProvider>
-                  {router.pathname === "/auth/login" ||
-                    router.pathname === "/" ? (
+              <AuthProvider>
+                {router.pathname === "/auth/login" ||
+                router.pathname === "/" ? (
+                  <Component {...pageProps} />
+                ) : (
+                  <Layout>
                     <Component {...pageProps} />
-                  ) : (
-                    <Layout>
-                      <Component {...pageProps} />
-                    </Layout>
-                  )}
-                </AuthProvider>
-              </EstimationProvider>
+                  </Layout>
+                )}
+              </AuthProvider>
             </CallerProvider>
           </AccountsProvider>
         </ChainProvider>

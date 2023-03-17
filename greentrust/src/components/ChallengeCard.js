@@ -2,11 +2,11 @@ import { useContext, useEffect, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  contractCall,
   getChallengeStatus,
   getChallengeStatusCode,
   getStatusColor,
 } from "@/utils";
+import { contractCall } from "@/InkUtils";
 import { LoaderContext } from "@/context/loaderContext";
 import Info from "@/components/Info";
 import Popover from "@mui/material/Popover";

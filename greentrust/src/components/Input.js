@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import DropDown from "./DropDown";
 import InputBox from "./InputBox";
 import { AuthContext } from "@/context/authContext";
- ;import { contractCall } from "@/utils";
+ ;import { contractCall } from "@/InkUtils";
 
 export default function Input() {
   
