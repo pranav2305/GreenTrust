@@ -17,7 +17,8 @@ export const fnMap = {
         "farmers",
         "fetchCropStakes",
         "fetchCropSensors",
-        "fetchCropChallenges"
+        "fetchCropChallenges",
+        "sensors"
     ],
     "write": []
 }

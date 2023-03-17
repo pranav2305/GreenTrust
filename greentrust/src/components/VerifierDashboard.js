@@ -44,8 +44,8 @@ export default function VerifierDashboard() {
 				const res = await contractCall(auth, 'fetchAllChallenges');
 				setChallenges(res.data);
 
-				setPendingReviews(res.data?.filter((challenge) => challenge.status == getChallengeStatusCode("ALLOTED") && parseInt(challenge.verifierId._hex) == parseInt(verifierIdRes.data._hex)));
-				setRaisedChallenges(res.data?.filter((challenge) => challenge.status == getChallengeStatusCode("OPEN") && parseInt(challenge.verifierId._hex) != parseInt(verifierIdRes.data._hex)));
+				setPendingReviews(res.data?.filter((challenge) => challenge.status == getChallengeStatusCode("ALLOTED") && challenge.verifierId == verifierIdRes.data));
+				setRaisedChallenges(res.data?.filter((challenge) => challenge.status == getChallengeStatusCode("OPEN") && challenge.verifierId != verifierIdRes.data));
 				setArchive(res.data?.filter((challenge) => (challenge.status == getChallengeStatusCode("SUCCESSFUL") || challenge.status == getChallengeStatusCode("REJECTED"))));
 			}
 		}

@@ -17,7 +17,7 @@ export default function Challenge() {
 	const [challenge, setChallenge] = useState({});
 	const [supportingDocs, setSupportingDocs] = useState([]);
 	const router = useRouter();
-	const { cropId } = router.query;
+	const { cropId, farmId } = router.query;
 	const { auth } = useAuth();
 
 	let data = {}
@@ -28,10 +28,9 @@ export default function Challenge() {
 			cropId,
 			challenge.description,
 			docsHash,
-			// { value: CHALLENGE_AMOUNT }
-		]);
+		], CHALLENGE_AMOUNT);
 
-		router.push('/dashboard');
+		router.push(`/farm/${farmId}/crop/${cropId}`);
 	};
 
 	return (<>

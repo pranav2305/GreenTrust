@@ -4,7 +4,7 @@ import { fnMap } from "@/config";
 const MAX_CALL_WEIGHT = new BN(5_000_000_000_000).isub(BN_ONE);
 const PROOFSIZE = new BN(1_000_000);
 
-export const contractCall = async (auth, func, params = []) => {
+export const contractCall = async (auth, func, params = [], value=null) => {
   if (!auth?.caller) {
     console.log("auth debug:", auth);
     const error = Error("Unauthorized");
@@ -45,6 +45,7 @@ export const contractCall = async (auth, func, params = []) => {
           proofSize: PROOFSIZE,
         }),
         storageDepositLimit,
+        ...(value && {value: value})
       },
       ...params
     );
@@ -57,6 +58,7 @@ export const contractCall = async (auth, func, params = []) => {
     const tx = await eval(`auth.contract.tx.${func}`)({
       storageDepositLimit,
       gasLimit,
+      ...(value && {value: value})
     }, ...params);
   
     const { web3FromAddress } = await import(

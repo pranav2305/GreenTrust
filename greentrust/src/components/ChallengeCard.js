@@ -54,10 +54,10 @@ export default function ChallengeCard({ challenge, status, auth, full = true }) 
   async function getCropData() {
     const data = {};
 
-    let res = await contractCall(auth, "crops", [parseInt(challenge?.challenged?._hex)]);
+    let res = await contractCall(auth, "crops", [challenge?.challenged]);
     data.crop = res.data;
 
-    res = await contractCall(auth, "farms", [parseInt(res.data.id._hex)]);
+    res = await contractCall(auth, "farms", [res.data.id]);
     data.farm = res.data;
 
     setStake(data);

@@ -19,7 +19,8 @@ import {
 import SensorCard from "@/components/SensorCard";
 import FarmerCard from "@/components/FarmerInfoCard";
 import Button from "@/components/Button";
-import { CAROUSEL_RESPONSIVE_SETTINGS, contractCall, sendNotification } from "@/InkUtils";
+import { contractCall, sendNotification } from "@/InkUtils";
+import { CAROUSEL_RESPONSIVE_SETTINGS } from "@/utils"
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import Info from "@/components/Info";
@@ -127,7 +128,7 @@ const Crop = () => {
 			data.stakeholders = [];
 			for (let stake of data.stakes) {
 				res = await contractCall(auth, 'addressToFarmerIds', [stake.stakeholder])
-				const farmerId = parseInt(res.data._hex);
+				const farmerId = res.data;
 
 				res = await contractCall(auth, 'farmers', [farmerId]);
 				data.stakeholders.push(res.data);
@@ -143,20 +144,21 @@ const Crop = () => {
 				}
 			}
 			setData(data);
-
+			console.log(data, "test");
 			if (data.sensors.length > 0) {
-
-				res = await contractCall(auth, "sensors", [parseInt(data.sensors[0].id._hex)]);
+				res = await contractCall(auth, "sensors", [data.sensors[0].id]);
 			}
-
-			if (res.data.data != null) {
+			console.log(res, "test")
+			if (res.data.data) {
 				res = await fetch(`https://ipfs.io/ipfs/${res.data.data}`);
+				console.log(res, "test")
 				const sensorData = await res.json();
+				console.log(sensorData, "test")
 				setSensorData(sensorData);
 			}
 		}
 		catch (err) {
-			setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })
+			setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}`, severity: "error" })
 		}
 		setLoading(false);
 	}
@@ -267,7 +269,7 @@ const Crop = () => {
 											setLoading(true);
 
 											try {
-												await contractCall(auth, 'addStake', [cropId])
+												await contractCall(auth, 'addStake', [cropId], data.crop.stakeAmount)
 											}
 											catch (err) {
 												setSnackbarInfo({ ...snackbarInfo, open: true, message: `Error ${err.code}: ${err.message}` })

@@ -26,7 +26,7 @@ const CropDetailCard = ({ stake, full=true }) => {
           {full && <hr className="my-2" />}
           <section className="flex flex-col gap-1 font-medium">
             <Info text={cropDetails.name} icon={faPagelines} style="text-brown" />
-            {full && <Info text={`${parseInt(stake.crop.stakeAmount._hex)}/- staked`} icon={faDollarSign} style="text-primary" textStyle="text-primary" />
+            {full && <Info text={`${stake.crop.stakeAmount}/- staked`} icon={faDollarSign} style="text-primary" textStyle="text-primary" />
             }<Info text={sowedOnDate} icon={faCalendarDays} />
             <Info text={`${timeToMature}M (to mature)`} icon={faStopwatch20} />
             <Info text={stake.farm.location} icon={faLocationDot} style="text-red" />
