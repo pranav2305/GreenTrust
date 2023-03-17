@@ -4,7 +4,6 @@ import * as React from "react";
 import { PropsWithChildren, useEffect, useState } from "react";
 import { INK_ENDPOINT, INK_CONTRACT_ADDRESS } from "@/config";
 import { options } from '@astar-network/astar-api';
-import result from "@/abi/result.json";
 import metadata from "@/abi/metadata.json";
 
 const ChainContext = React.createContext(undefined);

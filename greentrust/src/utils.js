@@ -1,8 +1,6 @@
 import { ethers, BrowserProvider } from "ethers";
 import IpfsHttpClientLite from "ipfs-http-client-lite";
 import { CONTRACT_ADDRESS, PUSH, PIPELINE_ADDRESS, FLOW_RATE, POLYGON_NETWORK_CONFIG, MANTLE_NETWORK_CONFIG } from "@/config";
-import GreenTrustABI from "@/abi/GreenTrust.json";
-import GreenPipelineABI from "@/abi/GreenPipeline.json";
 import * as PushAPI from "@pushprotocol/restapi";
 // import { Framework }  from "@superfluid-finance/sdk-core";
 import { PolywrapClient } from "@polywrap/client-js";
