@@ -3,6 +3,8 @@
 
 ![Landing](https://user-images.githubusercontent.com/76661350/219805436-17bd9c16-1c68-4c98-bfe6-d8c0e7afbb21.jpg)
 
+Video Link: https://www.loom.com/share/51efc04ba3b64d0f9c5eba3d7bd0385b
+
 ## Technologies Used
 
 - [Next Js](https://nextjs.org/)
