@@ -40,10 +40,8 @@ export default function VerifierDashboard() {
           auth.caller.address,
         ]);
         setVerifierId(verifierIdRes.data);
-
         const res = await contractCall(auth, "fetchAllChallenges");
         setChallenges(res.data);
-
         setPendingReviews(
           res.data?.filter(
             (challenge) =>

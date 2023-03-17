@@ -22,8 +22,9 @@ export default function Challenge() {
 
 	let data = {}
 	data.proofs = []
-
+	
 	const handleSubmit = async (docsHash) => {
+		console.log(auth.caller.address, "test")
 		await contractCall(auth, 'addChallenge', [
 			cropId,
 			challenge.description,

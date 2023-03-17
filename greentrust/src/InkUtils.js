@@ -74,6 +74,7 @@ export const contractCall = async (auth, func, params = [], value=null) => {
       // } else if (res.status.isFinalized) {
       //   console.log("Finalized");
       // }
+      console.log("res debug:", res)
       return  {
         status: 200,
         data: res.status
