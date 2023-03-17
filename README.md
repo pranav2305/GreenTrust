@@ -96,7 +96,7 @@ stakeholders, and alert stakeholders immediately of issues.
 - Figma - https://www.figma.com/file/QwfJiaDaLHx7Tav6Uwyiwf/GreenTrust?node-id=2%3A2&t=0jp5DXuTlfI99jiO-1
 
 ## Network Diagram 
-![GreenTrustND](https://user-images.githubusercontent.com/79962251/225829978-046fd97c-a429-4e42-9da3-bd4bd8a616f5.png)
+![GreenTrustND](https://user-images.githubusercontent.com/72497928/225965883-40487729-39be-4a8b-9f3c-aca26d683919.png)
 
 ## Team Members
 - Mehul Todi
