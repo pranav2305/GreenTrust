@@ -4,16 +4,14 @@ import { useState } from "react";
 import { useContext } from "react";
 import Skeleton from "@mui/material/Skeleton";
 import { CircularProgress } from "@mui/material";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 import Modal from "./Modal";
 import Navbar from "./Navbar";
 import Spinner from "./Spinner";
 import { LoaderContext } from "@/context/loaderContext";
-import { SnackbarContext } from "@/context/snackbarContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useAuth } from "@/context/authContext";
 import { faUser } from "@fortawesome/free-regular-svg-icons";
+import { SnackbarContext } from "@/context/snackbarContext";
 // import dynamic from "next/dynamic";
 // const Identicon = dynamic(() => import("@polkadot/react-identicon"));
 import AccountCard from "./AccountCard";
@@ -51,27 +49,10 @@ export default function Layout({ children }) {
   const { auth, loaded } = useAuth();
   const { loading, setLoading } = useContext(LoaderContext);
 
-  const [snackbarInfo, setSnackbarInfo] = useState({
-    open: false,
-    severity: "error",
-    message: "",
-  });
-
-  const handleClose = () => {
-    setSnackbarInfo({ ...snackbarInfo, open: false });
-  };
-
   return (
     <>
-      <Snackbar
-        open={snackbarInfo.open}
-        onClose={handleClose}
-        autoHideDuration={6000}
-      >
-        <Alert severity={snackbarInfo.severity}>{snackbarInfo.message}</Alert>
-      </Snackbar>
       <div className="bg-white relative min-h-[100vh]">
-        <SnackbarContext.Provider value={{ snackbarInfo, setSnackbarInfo }}>
+        
           <header>
             <Navbar />
           </header>
@@ -79,7 +60,6 @@ export default function Layout({ children }) {
           <main className="h-full flex justify-center px-6 md:px-[12%] mb-24">
             <div className="mt-8 h-full max-w-[1300px] w-full">{children}</div>
           </main>
-        </SnackbarContext.Provider>
       </div>
     </>
   );

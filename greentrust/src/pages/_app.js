@@ -16,12 +16,24 @@ import { LoaderContext } from "@/context/loaderContext";
 import { CallerProvider } from "@/context/callerContext";
 import { ChainProvider } from "@/context/chainContext";
 import { AuthProvider } from "@/context/authContext";
+import { SnackbarContext } from "@/context/snackbarContext";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 config.autoAddCss = false;
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [snackbarInfo, setSnackbarInfo] = useState({
+    open: false,
+    severity: "error",
+    message: "",
+  });
+
+  const handleClose = () => {
+    setSnackbarInfo({ ...snackbarInfo, open: false });
+  };
 
   return (
     <>
@@ -29,22 +41,33 @@ export default function App({ Component, pageProps }) {
         <title>GreenTrust</title>
       </Head>
       <LoaderContext.Provider value={{ loading, setLoading }}>
-        <ChainProvider>
-          <AccountsProvider>
-            <CallerProvider>
-              <AuthProvider>
-                {router.pathname === "/auth/login" ||
-                router.pathname === "/" ? (
-                  <Component {...pageProps} />
-                ) : (
-                  <Layout>
+        <SnackbarContext.Provider value={{ snackbarInfo, setSnackbarInfo }}>
+          <ChainProvider>
+            <AccountsProvider>
+              <CallerProvider>
+                <AuthProvider>
+                  {router.pathname === "/auth/login" ||
+                  router.pathname === "/" ? (
                     <Component {...pageProps} />
-                  </Layout>
-                )}
-              </AuthProvider>
-            </CallerProvider>
-          </AccountsProvider>
-        </ChainProvider>
+                  ) : (
+                    <Layout>
+                      <Component {...pageProps} />
+                    </Layout>
+                  )}
+                  <Snackbar
+                    open={snackbarInfo.open}
+                    onClose={handleClose}
+                    autoHideDuration={6000}
+                  >
+                    <Alert severity={snackbarInfo.severity}>
+                      {snackbarInfo.message}
+                    </Alert>
+                  </Snackbar>
+                </AuthProvider>
+              </CallerProvider>
+            </AccountsProvider>
+          </ChainProvider>
+        </SnackbarContext.Provider>
       </LoaderContext.Provider>
     </>
   );

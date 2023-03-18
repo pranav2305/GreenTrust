@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
 } from "react";
+import { SnackbarContext } from "@/context/snackbarContext";
 
 const AccountsContext = createContext(undefined);
 
@@ -12,6 +13,7 @@ function AccountsProvider({ children }) {
   const [accounts, setAccounts] = useState();
   const [signer, setSigner] = useState();
   const [hasAccess, setHasAccess] = useState(undefined);
+  const { setSnackbarInfo } = useContext(SnackbarContext);
 
   function login() {
     setHasAccess(true);
@@ -24,9 +26,19 @@ function AccountsProvider({ children }) {
   async function getExtension() {
     const { web3Enable } = await import("@polkadot/extension-dapp");
     const extensions = await web3Enable("green-trust");
-    return extensions.find(
+    const extns = extensions.find(
       (e) => e.name === "polkadot-js" || e.name === "subwallet-js"
     );
+    if (!extns) {
+      console.log("Please install polkadot-js extension");
+      setSnackbarInfo({
+        open: true,
+        severity: "error",
+        message: "Please install polkadot-js extension",
+      });
+      setHasAccess(false);
+    }
+    return extns;
   }
 
   const initAccounts = useCallback(async () => {
