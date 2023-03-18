@@ -215,7 +215,7 @@ export const getChallengeStatusCode = (status) => {
     OPEN: "Open",
     ALLOTED: "Alloted",
     REJECTED: "Rejected",
-    SUCCESSFUL: "Successful",
+    SUCCESSFUL: "Succesful",
   };
   return map[status];
 };
@@ -225,7 +225,7 @@ export const getStatusColor = (code) => {
     "Open": "border-yellow",
     "Alloted": "border-blue",
     "Rejected": "border-red",
-    "Successful": "border-primary",
+    "Succesful": "border-primary",
   };
   return map[code];
 };

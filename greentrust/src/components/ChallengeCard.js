@@ -45,19 +45,19 @@ export default function ChallengeCard({
       } else if (action == 2) {
         res = await contractCall(auth, "giveVerdict", [
           challenge.id,
-          getChallengeStatusCode("SUCCESSFUL"),
+          getChallengeStatusCode("SUCCESSFUL").toLowerCase(),
         ]);
       } else {
         res = await contractCall(auth, "giveVerdict", [
           challenge.id,
-          getChallengeStatusCode("REJECTED"),
+          getChallengeStatusCode("REJECTED").toLowerCase(),
         ]);
       }
     } catch (err) {
       setSnackbarInfo({
         ...snackbarInfo,
         open: true,
-        message: "Failure",
+        message: err.message,
       });
     }
     setLoading(false);
