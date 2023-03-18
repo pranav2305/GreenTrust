@@ -20,7 +20,7 @@ import SensorCard from "@/components/SensorCard";
 import FarmerCard from "@/components/FarmerInfoCard";
 import Button from "@/components/Button";
 import { contractCall, sendNotification } from "@/InkUtils";
-import { CAROUSEL_RESPONSIVE_SETTINGS } from "@/utils"
+import { CAROUSEL_RESPONSIVE_SETTINGS, getChallengeStatusCode } from "@/utils"
 import { SnackbarContext } from "@/context/snackbarContext";
 import { LoaderContext } from "@/context/loaderContext";
 import Info from "@/components/Info";
@@ -31,6 +31,7 @@ import Modal from "@/components/Modal";
 import QRCard from "@/components/QRCard";
 import CustomCarousel from "@/components/CustomCarousel";
 import { HOST } from "@/config";
+import { Alert } from "@mui/material";
 
 import Highcharts from "highcharts";
 
@@ -120,7 +121,8 @@ const Crop = () => {
 			// res = await contractCall(auth, "fetchAllChallenges", []);
 			data.challenges = res.data;
 			for (let challenge of data.challenges) {
-				if (challenge.challenged == cropId && challenge.status == 3) {
+				if (challenge.challenged == cropId && challenge.status == getChallengeStatusCode("SUCCESSFUL")) {
+					console.log("here")
 					setIsInvalid(true);
 				}
 			}
@@ -301,7 +303,7 @@ const Crop = () => {
 				</div>
 				<div>
 					{data.challenges.length > 0 && <><h3>
-						Pending Challenges
+						Challenges
 					</h3>
 						<div className="static my-8">
 							<CustomCarousel responsive={CAROUSEL_RESPONSIVE_SETTINGS}>{data.challenges?.map((challenge, index) => (
