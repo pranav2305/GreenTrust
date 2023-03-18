@@ -34,7 +34,7 @@ function AccountsProvider({ children }) {
       setSnackbarInfo({
         open: true,
         severity: "error",
-        message: "Please install polkadot-js extension",
+        message: "Please install polkadot-js extension from <a href='https://polkadot.js.org/extension/' style='text-decoration: underline; color: blue;' target='_blank'>here</a>",
       });
       setHasAccess(false);
     }

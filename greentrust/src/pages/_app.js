@@ -59,8 +59,8 @@ export default function App({ Component, pageProps }) {
                     onClose={handleClose}
                     autoHideDuration={6000}
                   >
-                    <Alert severity={snackbarInfo.severity}>
-                      {snackbarInfo.message}
+                    <Alert severity={snackbarInfo.severity} sx={{fontFamily: "Poppins, sans-serif"}}>
+                      <div dangerouslySetInnerHTML={{ __html: snackbarInfo.message }} />
                     </Alert>
                   </Snackbar>
                 </AuthProvider>

@@ -3,22 +3,23 @@ import { faGear } from "@fortawesome/free-solid-svg-icons";
 import Button from "./Button";
 import { useAccountsContext } from "@/context/accountContext";
 import { useRouter } from "next/router";
+import { SnackbarContext } from "@/context/snackbarContext";
+import { useContext } from "react";
+import dynamic from "next/dynamic";
+const CC = dynamic(() => import("@/components/CopyClipboard").then(mod => mod.CopyClipboard), { ssr: false })
 
 export default function AccountCard({ auth }) {
   const { logout } = useAccountsContext();
   const router = useRouter();
-
+  const { setSnackbarInfo } = useContext(SnackbarContext);
   const address = auth?.caller?.address;
 
   return (
     <div className="p-5 rounded-lg">
       <div className="mb-0">
-        <p className="text-darkGray text-base font-bold">
-          {address.slice(0, 5) + '...' + address.slice(-5)}
-        </p>
-        {/* <p className="text-gray text-sm font-bold text-ellipsis overflow-hidden whitespace-nowrap" title={auth.user?.email}>{auth.user?.email}</p> */}
+        {address && <CC content={address} setSnackbarInfo={setSnackbarInfo} />}
       </div>
-      {/* <div className="flex flex-row justify-around items-center">
+      <div className="flex flex-row justify-around items-center gap-x-5 mt-1">
         <FontAwesomeIcon
           icon={faGear}
           className="text-primary text-xl cursor-pointer hover:scale-105"
@@ -31,7 +32,7 @@ export default function AccountCard({ auth }) {
             router.push("/");
           }}
         />
-      </div> */}
+      </div>
     </div>
   );
 }

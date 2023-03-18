@@ -323,3 +323,10 @@ export const polygonContractCall = async (auth, func, params = []) => {
     throw error;
   }
 }
+
+export const truncate = (string, length) => {
+  if (string.length > length) {
+    return string.substring(0, length) + "...";
+  }
+  return string;
+}
